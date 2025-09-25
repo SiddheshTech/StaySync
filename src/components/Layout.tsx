@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
 
@@ -7,13 +8,15 @@ interface LayoutProps {
 }
 
 const Layout = ({ children }: LayoutProps) => {
+  const { pathname } = useLocation();
+  const hideChrome = pathname === '/dashboard';
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      <main className="flex-1 pt-16">
+      {!hideChrome && <Header />}
+      <main className={hideChrome ? 'flex-1' : 'flex-1 pt-16'}>
         {children}
       </main>
-      <Footer />
+      {!hideChrome && <Footer />}
     </div>
   );
 };
