@@ -19,6 +19,7 @@ import MessagesPage from "./pages/MessagesPage";
 import ApplicationsPage from "./pages/ApplicationsPage";
 import SearchPage from "./pages/SearchPage";
 import NotFound from "./pages/NotFound";
+import NavigationPage from "./pages/NavigationPage";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/safety" element={<SafetyPage />} />
             <Route path="/universities" element={<UniversityPartnersPage />} />
             <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/navigation" element={<NavigationPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
