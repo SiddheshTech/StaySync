@@ -63,7 +63,13 @@ const LoginPage = () => {
       title: "Login Successful!",
       description: "Welcome back to CampusConnect!",
     });
-    navigate('/dashboard');
+    
+    // Redirect based on login type
+    if (formData.loginType === 'university') {
+      navigate('/admin');
+    } else {
+      navigate('/dashboard');
+    }
   };
 
   const handleForgotPassword = () => {
