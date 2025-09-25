@@ -20,7 +20,13 @@ const adminNav = [
 const AdminLayout = (_props: AdminLayoutProps) => {
   const location = useLocation();
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => {
+    // Highlight parent when on nested routes, but keep exact for root '/admin'
+    if (path === '/admin') {
+      return location.pathname === '/admin';
+    }
+    return location.pathname.startsWith(path);
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

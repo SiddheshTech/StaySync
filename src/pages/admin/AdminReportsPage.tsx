@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const AdminReportsPage = () => {
@@ -10,7 +11,7 @@ const AdminReportsPage = () => {
           <CardTitle>Analytics & Forecasting</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <Select>
               <SelectTrigger>
                 <SelectValue placeholder="Time Range" />
@@ -21,6 +22,7 @@ const AdminReportsPage = () => {
                 <SelectItem value="ytd">Year to date</SelectItem>
               </SelectContent>
             </Select>
+            <Input placeholder="Segment: e.g. campus, program" />
             <Button className="btn-hero">Generate Report</Button>
             <Button variant="secondary">Export CSV</Button>
           </div>

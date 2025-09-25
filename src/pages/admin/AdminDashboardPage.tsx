@@ -1,6 +1,17 @@
+import { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BarChart3, Users, TrendingUp, AlertTriangle } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip as RTooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
 const AdminDashboardPage = () => {
   const stats = [
@@ -10,8 +21,54 @@ const AdminDashboardPage = () => {
     { label: 'Identified Issues', value: '23', sub: 'Open problems', icon: AlertTriangle },
   ];
 
+  const [range, setRange] = useState<string>('30d');
+  const [campus, setCampus] = useState<string>('all');
+
+  const usageData = useMemo(
+    () => [
+      { name: 'Mon', usage: 120 },
+      { name: 'Tue', usage: 200 },
+      { name: 'Wed', usage: 150 },
+      { name: 'Thu', usage: 220 },
+      { name: 'Fri', usage: 180 },
+      { name: 'Sat', usage: 90 },
+      { name: 'Sun', usage: 70 },
+    ],
+    [range, campus],
+  );
+
   return (
     <div className="space-y-6">
+      <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+        <div className="flex gap-2">
+          <Select value={range} onValueChange={setRange}>
+            <SelectTrigger className="w-36">
+              <SelectValue placeholder="Range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7d">Last 7 days</SelectItem>
+              <SelectItem value="30d">Last 30 days</SelectItem>
+              <SelectItem value="qtd">Quarter to date</SelectItem>
+              <SelectItem value="ytd">Year to date</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={campus} onValueChange={setCampus}>
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder="Campus" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Campuses</SelectItem>
+              <SelectItem value="north">North Campus</SelectItem>
+              <SelectItem value="south">South Campus</SelectItem>
+              <SelectItem value="west">West Campus</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline">Compare</Button>
+          <Button className="btn-hero">Export</Button>
+        </div>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((s) => (
           <Card key={s.label}>
@@ -33,8 +90,15 @@ const AdminDashboardPage = () => {
             <CardTitle>Platform Usage</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-40 rounded-md bg-muted flex items-center justify-center text-muted-foreground">
-              Usage charts placeholder
+            <div className="h-52">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={usageData}>
+                  <XAxis dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+                  <RTooltip />
+                  <Bar dataKey="usage" radius={[6, 6, 0, 0]} fill="hsl(var(--primary))" />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
