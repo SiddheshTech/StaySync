@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import BrandBar from '@/components/BrandBar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { 
   Select,
   SelectContent,
@@ -18,6 +20,10 @@ import {
 } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,7 +39,38 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  MoreVertical,
+  Edit,
+  Trash2,
+  Download,
+  Upload,
+  FileText,
+  Phone,
+  Mail,
+  Star,
+  Filter,
+  Search,
+  Plus,
+  RefreshCw,
+  ExternalLink,
+  ChevronRight,
+  Building,
+  Home,
+  Wifi,
+  Car,
+  Utensils,
+  Dumbbell,
+  Shield,
+  Heart,
+  Bookmark,
+  Share2,
+  Copy,
+  Send,
+  Archive,
+  Flag,
+  Settings,
+  Bell
 } from 'lucide-react';
 
 const applicationSchema = z.object({
@@ -77,6 +114,14 @@ const applicationSchema = z.object({
 type ApplicationFormValues = z.infer<typeof applicationSchema>;
 
 const ApplicationsPage = () => {
+  const navigate = useNavigate();
+  const [selectedApplication, setSelectedApplication] = useState<any>(null);
+  const [showApplicationDetail, setShowApplicationDetail] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [showWithdrawDialog, setShowWithdrawDialog] = useState(false);
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+
   const form = useForm<ApplicationFormValues>({
     resolver: zodResolver(applicationSchema),
     defaultValues: {
@@ -94,6 +139,20 @@ const ApplicationsPage = () => {
     console.log('Application submitted', values);
     toast({ title: 'Application submitted', description: 'Your application was submitted successfully.' });
   };
+
+  const handleViewApplication = (application: any) => {
+    setSelectedApplication(application);
+    setShowApplicationDetail(true);
+  };
+
+  const handleWithdrawApplication = (applicationId: number) => {
+    toast({ title: 'Application Withdrawn', description: 'Your application has been withdrawn successfully.' });
+    setShowWithdrawDialog(false);
+  };
+
+  const handleUpdateApplication = (applicationId: number) => {
+    setShowUpdateDialog(true);
+  };
   const applications = [
     {
       id: 1,
@@ -103,9 +162,32 @@ const ApplicationsPage = () => {
       applicationDate: '2024-01-15',
       status: 'pending',
       landlord: 'Property Management Co.',
+      landlordEmail: 'contact@propertymgmt.com',
+      landlordPhone: '(555) 123-4567',
       moveInDate: '2024-08-01',
       progress: 75,
-      nextStep: 'Background check in progress'
+      nextStep: 'Background check in progress',
+      priority: 'high',
+      compatibility: 92,
+      amenities: ['Wifi', 'Laundry', 'Parking', 'Gym'],
+      images: ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=300&fit=crop'],
+      timeline: [
+        { date: '2024-01-15', event: 'Application submitted', status: 'completed' },
+        { date: '2024-01-16', event: 'Initial review', status: 'completed' },
+        { date: '2024-01-18', event: 'Document verification', status: 'completed' },
+        { date: '2024-01-20', event: 'Background check', status: 'in_progress' },
+        { date: '2024-01-25', event: 'Interview scheduled', status: 'pending' },
+        { date: '2024-01-30', event: 'Final decision', status: 'pending' }
+      ],
+      documents: [
+        { name: 'ID Verification', status: 'approved', uploaded: '2024-01-15' },
+        { name: 'Financial Statement', status: 'approved', uploaded: '2024-01-15' },
+        { name: 'Enrollment Proof', status: 'pending', uploaded: '2024-01-16' }
+      ],
+      messages: [
+        { from: 'landlord', message: 'Thank you for your application. We will review it within 2 business days.', time: '2024-01-15 14:30' },
+        { from: 'you', message: 'I have uploaded all required documents. Please let me know if you need anything else.', time: '2024-01-16 09:15' }
+      ]
     },
     {
       id: 2,
@@ -115,9 +197,32 @@ const ApplicationsPage = () => {
       applicationDate: '2024-01-10',
       status: 'approved',
       landlord: 'Jane Smith',
+      landlordEmail: 'jane.smith@email.com',
+      landlordPhone: '(555) 987-6543',
       moveInDate: '2024-08-15',
       progress: 100,
-      nextStep: 'Sign lease agreement'
+      nextStep: 'Sign lease agreement',
+      priority: 'medium',
+      compatibility: 88,
+      amenities: ['Wifi', 'Kitchen', 'Study Room', 'Balcony'],
+      images: ['https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400&h=300&fit=crop'],
+      timeline: [
+        { date: '2024-01-10', event: 'Application submitted', status: 'completed' },
+        { date: '2024-01-11', event: 'Initial review', status: 'completed' },
+        { date: '2024-01-12', event: 'Document verification', status: 'completed' },
+        { date: '2024-01-13', event: 'Background check', status: 'completed' },
+        { date: '2024-01-14', event: 'Interview completed', status: 'completed' },
+        { date: '2024-01-15', event: 'Application approved', status: 'completed' }
+      ],
+      documents: [
+        { name: 'ID Verification', status: 'approved', uploaded: '2024-01-10' },
+        { name: 'Financial Statement', status: 'approved', uploaded: '2024-01-10' },
+        { name: 'Enrollment Proof', status: 'approved', uploaded: '2024-01-11' }
+      ],
+      messages: [
+        { from: 'landlord', message: 'Congratulations! Your application has been approved. Please review the lease agreement.', time: '2024-01-15 16:45' },
+        { from: 'you', message: 'Thank you! I will review the lease and get back to you by tomorrow.', time: '2024-01-15 17:20' }
+      ]
     },
     {
       id: 3,
@@ -127,9 +232,30 @@ const ApplicationsPage = () => {
       applicationDate: '2024-01-12',
       status: 'rejected',
       landlord: 'ABC Properties',
+      landlordEmail: 'applications@abcproperties.com',
+      landlordPhone: '(555) 456-7890',
       moveInDate: '2024-08-01',
       progress: 50,
-      nextStep: 'Application declined'
+      nextStep: 'Application declined',
+      priority: 'low',
+      compatibility: 75,
+      amenities: ['Wifi', 'Garden', 'Parking', 'Pet-friendly'],
+      images: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop'],
+      timeline: [
+        { date: '2024-01-12', event: 'Application submitted', status: 'completed' },
+        { date: '2024-01-13', event: 'Initial review', status: 'completed' },
+        { date: '2024-01-14', event: 'Document verification', status: 'failed' },
+        { date: '2024-01-15', event: 'Application declined', status: 'completed' }
+      ],
+      documents: [
+        { name: 'ID Verification', status: 'approved', uploaded: '2024-01-12' },
+        { name: 'Financial Statement', status: 'rejected', uploaded: '2024-01-12' },
+        { name: 'Enrollment Proof', status: 'approved', uploaded: '2024-01-13' }
+      ],
+      messages: [
+        { from: 'landlord', message: 'Unfortunately, we cannot proceed with your application due to incomplete financial documentation.', time: '2024-01-15 11:30' },
+        { from: 'you', message: 'I understand. Thank you for considering my application.', time: '2024-01-15 12:15' }
+      ]
     }
   ];
 
@@ -201,49 +327,100 @@ const ApplicationsPage = () => {
         </div>
 
         <Tabs defaultValue="applications" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="applications">Active Applications</TabsTrigger>
             <TabsTrigger value="saved">Saved Listings</TabsTrigger>
-            <TabsTrigger value="apply">Apply</TabsTrigger>
-            <TabsTrigger value="status">Status</TabsTrigger>
-            <TabsTrigger value="communications">Communications</TabsTrigger>
+            <TabsTrigger value="apply">New Application</TabsTrigger>
+            <TabsTrigger value="timeline">Timeline</TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsTrigger value="communications">Messages</TabsTrigger>
           </TabsList>
 
           <TabsContent value="applications" className="space-y-6">
+            {/* Search and Filter Bar */}
+            <Card className="p-4">
+              <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                <div className="flex flex-1 gap-4 items-center">
+                  <div className="relative flex-1 max-w-sm">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Input
+                      placeholder="Search applications..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm">
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Refresh
+                  </Button>
+                  <Button size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    New Application
+                  </Button>
+                </div>
+              </div>
+            </Card>
+
             {/* Application Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Card className="card-hover">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Total Applications</p>
                       <p className="text-2xl font-bold text-primary">3</p>
                     </div>
-                    <AlertCircle className="w-8 h-8 text-primary" />
+                    <FileText className="w-8 h-8 text-primary" />
                   </div>
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="card-hover">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Pending Review</p>
-                      <p className="text-2xl font-bold text-primary">1</p>
+                      <p className="text-2xl font-bold text-orange-500">1</p>
                     </div>
-                    <Clock className="w-8 h-8 text-primary" />
+                    <Clock className="w-8 h-8 text-orange-500" />
                   </div>
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="card-hover">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Approved</p>
-                      <p className="text-2xl font-bold text-primary">1</p>
+                      <p className="text-2xl font-bold text-green-500">1</p>
                     </div>
-                    <CheckCircle className="w-8 h-8 text-primary" />
+                    <CheckCircle className="w-8 h-8 text-green-500" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="card-hover">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Success Rate</p>
+                      <p className="text-2xl font-bold text-blue-500">33%</p>
+                    </div>
+                    <Star className="w-8 h-8 text-blue-500" />
                   </div>
                 </CardContent>
               </Card>
@@ -251,15 +428,39 @@ const ApplicationsPage = () => {
 
             {/* Applications List */}
             <div className="space-y-4">
-              {applications.map((application) => (
-                <Card key={application.id} className="card-hover">
+              {applications
+                .filter(app => 
+                  (statusFilter === 'all' || app.status === statusFilter) &&
+                  (searchQuery === '' || app.property.toLowerCase().includes(searchQuery.toLowerCase()) || app.location.toLowerCase().includes(searchQuery.toLowerCase()))
+                )
+                .map((application) => (
+                <Card key={application.id} className="card-hover group">
                   <CardContent className="p-6">
-                    <div className="flex flex-col lg:flex-row lg:items-center gap-6">
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-4">
-                          <div>
-                            <h3 className="text-lg font-semibold">{application.property}</h3>
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
+                    <div className="flex flex-col lg:flex-row gap-6">
+                      {/* Property Image */}
+                      <div className="w-full lg:w-48 h-32 lg:h-40 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                        <img 
+                          src={application.images[0]} 
+                          alt={application.property}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                        />
+                      </div>
+
+                      {/* Main Content */}
+                      <div className="flex-1 space-y-4">
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-3">
+                              <h3 className="text-xl font-semibold">{application.property}</h3>
+                              {application.priority === 'high' && (
+                                <Badge variant="destructive" className="text-xs">High Priority</Badge>
+                              )}
+                              <Badge variant="outline" className="text-xs">
+                                {application.compatibility}% Match
+                              </Badge>
+                            </div>
+                            
+                            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                               <div className="flex items-center gap-1">
                                 <MapPin className="w-4 h-4" />
                                 {application.location}
@@ -273,10 +474,60 @@ const ApplicationsPage = () => {
                                 Move-in: {new Date(application.moveInDate).toLocaleDateString()}
                               </div>
                             </div>
+
+                            {/* Amenities */}
+                            <div className="flex flex-wrap gap-2">
+                              {application.amenities.slice(0, 4).map((amenity, index) => (
+                                <Badge key={index} variant="secondary" className="text-xs">
+                                  {amenity}
+                                </Badge>
+                              ))}
+                              {application.amenities.length > 4 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  +{application.amenities.length - 4} more
+                                </Badge>
+                              )}
+                            </div>
                           </div>
-                          {getStatusBadge(application.status)}
+                          
+                          <div className="flex items-center gap-2">
+                            {getStatusBadge(application.status)}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <MoreVertical className="w-4 h-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleViewApplication(application)}>
+                                  <Eye className="w-4 h-4 mr-2" />
+                                  View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleUpdateApplication(application.id)}>
+                                  <Edit className="w-4 h-4 mr-2" />
+                                  Update Application
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <MessageSquare className="w-4 h-4 mr-2" />
+                                  Contact Landlord
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                  <Download className="w-4 h-4 mr-2" />
+                                  Download Documents
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  className="text-destructive"
+                                  onClick={() => setShowWithdrawDialog(true)}
+                                >
+                                  <Trash2 className="w-4 h-4 mr-2" />
+                                  Withdraw Application
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </div>
                         
+                        {/* Progress and Status */}
                         <div className="space-y-3">
                           <div>
                             <div className="flex items-center justify-between mb-2">
@@ -286,32 +537,44 @@ const ApplicationsPage = () => {
                             <Progress value={application.progress} className="h-2" />
                           </div>
                           
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                             <div>
                               <span className="text-muted-foreground">Applied:</span>
-                              <span className="ml-2">{new Date(application.applicationDate).toLocaleDateString()}</span>
+                              <span className="ml-2 font-medium">{new Date(application.applicationDate).toLocaleDateString()}</span>
                             </div>
                             <div>
                               <span className="text-muted-foreground">Landlord:</span>
-                              <span className="ml-2">{application.landlord}</span>
+                              <span className="ml-2 font-medium">{application.landlord}</span>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Priority:</span>
+                              <span className="ml-2 font-medium capitalize">{application.priority}</span>
                             </div>
                           </div>
                           
-                          <div className="flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4 text-primary" />
+                          <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+                            <AlertCircle className="w-4 h-4 text-primary flex-shrink-0" />
                             <span className="text-sm font-medium">{application.nextStep}</span>
                           </div>
                         </div>
                       </div>
                       
-                      <div className="flex flex-col gap-2">
-                        <Button variant="outline" size="sm">
+                      {/* Action Buttons */}
+                      <div className="flex flex-col gap-2 lg:w-32">
+                        <Button 
+                          onClick={() => handleViewApplication(application)}
+                          className="w-full"
+                        >
                           <Eye className="w-4 h-4 mr-2" />
                           View Details
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" className="w-full">
                           <MessageSquare className="w-4 h-4 mr-2" />
-                          Contact Landlord
+                          Message
+                        </Button>
+                        <Button variant="outline" size="sm" className="w-full">
+                          <Phone className="w-4 h-4 mr-2" />
+                          Call
                         </Button>
                       </div>
                     </div>
@@ -324,45 +587,189 @@ const ApplicationsPage = () => {
           <TabsContent value="saved" className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-semibold">Saved Listings</h2>
-                <p className="text-muted-foreground">Properties you've bookmarked for later</p>
+                <h2 className="text-2xl font-semibold">Saved Listings</h2>
+                <p className="text-muted-foreground">Properties you've bookmarked for later consideration</p>
               </div>
-              <Badge variant="secondary">{savedListings.length} saved</Badge>
+              <div className="flex items-center gap-4">
+                <Badge variant="secondary" className="text-sm px-3 py-1">
+                  {savedListings.length} saved listings
+                </Badge>
+                <Button variant="outline" size="sm">
+                  <Filter className="w-4 h-4 mr-2" />
+                  Filter
+                </Button>
+              </div>
             </div>
+
+            {/* Search and Sort Bar */}
+            <Card className="p-4">
+              <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                <div className="flex flex-1 gap-4 items-center">
+                  <div className="relative flex-1 max-w-sm">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Input
+                      placeholder="Search saved listings..."
+                      className="pl-10"
+                    />
+                  </div>
+                  <Select defaultValue="newest">
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="newest">Newest First</SelectItem>
+                      <SelectItem value="oldest">Oldest First</SelectItem>
+                      <SelectItem value="price-low">Price: Low to High</SelectItem>
+                      <SelectItem value="price-high">Price: High to Low</SelectItem>
+                      <SelectItem value="location">Location</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm">
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Refresh
+                  </Button>
+                  <Button size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Browse More
+                  </Button>
+                </div>
+              </div>
+            </Card>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {savedListings.map((listing) => (
-                <Card key={listing.id} className="card-hover">
-                  <div className="aspect-video bg-muted rounded-t-lg"></div>
+                <Card key={listing.id} className="card-hover group">
+                  <div className="relative">
+                    <div className="aspect-video bg-muted rounded-t-lg overflow-hidden">
+                      <img 
+                        src={listing.image} 
+                        alt={listing.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                      />
+                    </div>
+                    <div className="absolute top-3 right-3 flex gap-2">
+                      <Button size="sm" variant="secondary" className="h-8 w-8 p-0">
+                        <Heart className="w-4 h-4 text-red-500" />
+                      </Button>
+                      <Button size="sm" variant="secondary" className="h-8 w-8 p-0">
+                        <Share2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <div className="absolute top-3 left-3">
+                      <Badge className="bg-primary/90 text-white">Saved</Badge>
+                    </div>
+                  </div>
                   <CardContent className="p-4">
-                    <h3 className="font-semibold mb-2">{listing.title}</h3>
-                    <div className="space-y-2 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        {listing.location}
+                    <div className="space-y-3">
+                      <div>
+                        <h3 className="font-semibold text-lg mb-1">{listing.title}</h3>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <MapPin className="w-4 h-4" />
+                          {listing.location}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <DollarSign className="w-4 h-4" />
-                        {listing.rent}
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <DollarSign className="w-4 h-4 text-green-600" />
+                          <span className="text-xl font-bold text-green-600">{listing.rent}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 text-yellow-500" />
+                          <span className="text-sm font-medium">4.8</span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1">
+                        <Badge variant="secondary" className="text-xs">Wifi</Badge>
+                        <Badge variant="secondary" className="text-xs">Laundry</Badge>
+                        <Badge variant="secondary" className="text-xs">Parking</Badge>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>Saved {listing.savedDate}</span>
+                        <span>2.1 miles from campus</span>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between mt-4">
-                      <span className="text-xs text-muted-foreground">Saved {listing.savedDate}</span>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline">View</Button>
-                        <Button size="sm" className="btn-hero">Apply</Button>
-                      </div>
+                    
+                    <div className="flex gap-2 mt-4">
+                      <Button variant="outline" className="flex-1">
+                        <Eye className="w-4 h-4 mr-2" />
+                        View Details
+                      </Button>
+                      <Button className="flex-1 btn-hero">
+                        <FileText className="w-4 h-4 mr-2" />
+                        Apply Now
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
+
+            {/* Empty State */}
+            {savedListings.length === 0 && (
+              <Card className="p-12 text-center">
+                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Bookmark className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">No Saved Listings</h3>
+                <p className="text-muted-foreground mb-4">
+                  Start browsing properties and save the ones you like for later.
+                </p>
+                <Button>
+                  <Search className="w-4 h-4 mr-2" />
+                  Browse Listings
+                </Button>
+              </Card>
+            )}
           </TabsContent>
           <TabsContent value="apply" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold">New Application</h2>
+                <p className="text-muted-foreground">Create a comprehensive housing application</p>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm">
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Reset Form
+                </Button>
+                <Button size="sm">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Save Draft
+                </Button>
+              </div>
+            </div>
+
+            {/* Application Progress */}
+            <Card className="p-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span>Application Progress</span>
+                  <span>0% Complete</span>
+                </div>
+                <Progress value={0} className="h-2" />
+                <p className="text-xs text-muted-foreground">
+                  Complete all required sections to submit your application
+                </p>
+              </div>
+            </Card>
+
             <Card className="card-hover">
               <CardHeader className="pb-3">
-                <CardTitle>Housing Application</CardTitle>
-                <CardDescription>Complete all sections and upload supporting documents</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-xl">Housing Application Form</CardTitle>
+                    <CardDescription>Complete all sections and upload supporting documents</CardDescription>
+                  </div>
+                  <Badge variant="outline" className="text-xs">
+                    <Clock className="w-3 h-3 mr-1" />
+                    Estimated time: 10-15 minutes
+                  </Badge>
+                </div>
               </CardHeader>
               <CardContent>
                 <Form {...form}>
@@ -744,6 +1151,129 @@ const ApplicationsPage = () => {
             </Card>
           </TabsContent>
           
+          <TabsContent value="timeline" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold">Application Timeline</h2>
+                <p className="text-muted-foreground">Track the progress of all your applications</p>
+              </div>
+              <Button variant="outline" size="sm">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
+
+            <div className="space-y-6">
+              {applications.map((application) => (
+                <Card key={application.id} className="card-hover">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-lg">{application.property}</CardTitle>
+                        <CardDescription>{application.location}</CardDescription>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {getStatusBadge(application.status)}
+                        <Badge variant="outline">{application.compatibility}% Match</Badge>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="relative">
+                      <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-muted"></div>
+                      <div className="space-y-6">
+                        {application.timeline.map((step, index) => (
+                          <div key={index} className="relative flex items-start gap-4">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                              step.status === 'completed' 
+                                ? 'bg-green-500 text-white' 
+                                : step.status === 'in_progress'
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-muted text-muted-foreground'
+                            }`}>
+                              {step.status === 'completed' ? (
+                                <CheckCircle className="w-4 h-4" />
+                              ) : step.status === 'in_progress' ? (
+                                <Clock className="w-4 h-4" />
+                              ) : (
+                                <AlertCircle className="w-4 h-4" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-medium">{step.event}</h4>
+                                <span className="text-sm text-muted-foreground">
+                                  {new Date(step.date).toLocaleDateString()}
+                                </span>
+                              </div>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {step.status === 'completed' && 'Completed successfully'}
+                                {step.status === 'in_progress' && 'Currently in progress'}
+                                {step.status === 'pending' && 'Awaiting processing'}
+                                {step.status === 'failed' && 'Requires attention'}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="documents" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold">Document Management</h2>
+                <p className="text-muted-foreground">Upload and manage your application documents</p>
+              </div>
+              <Button size="sm">
+                <Upload className="w-4 h-4 mr-2" />
+                Upload Documents
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {applications.map((application) => (
+                <Card key={application.id} className="card-hover">
+                  <CardHeader>
+                    <CardTitle className="text-lg">{application.property}</CardTitle>
+                    <CardDescription>{application.location}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {application.documents.map((doc, index) => (
+                        <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <FileText className="w-5 h-5 text-muted-foreground" />
+                            <div>
+                              <p className="font-medium">{doc.name}</p>
+                              <p className="text-sm text-muted-foreground">
+                                Uploaded {new Date(doc.uploaded).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge 
+                              variant={doc.status === 'approved' ? 'default' : doc.status === 'rejected' ? 'destructive' : 'secondary'}
+                            >
+                              {doc.status}
+                            </Badge>
+                            <Button variant="ghost" size="sm">
+                              <Download className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
           <TabsContent value="status" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card>
@@ -828,97 +1358,385 @@ const ApplicationsPage = () => {
           </TabsContent>
 
           <TabsContent value="communications" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle>Direct Messages</CardTitle>
-                  <CardDescription>Chat with listers</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="h-48 border rounded-md p-3 overflow-auto text-sm space-y-2">
-                    <div><span className="font-medium">You:</span> Hi, is the unit still available?</div>
-                    <div><span className="font-medium">Lister:</span> Yes, would you like to schedule a viewing?</div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Input placeholder="Write a message..." />
-                    <Button><MessageSquare className="w-4 h-4 mr-1" /> Send</Button>
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-semibold">Messages & Communications</h2>
+                <p className="text-muted-foreground">Stay connected with landlords and property managers</p>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm">
+                  <Settings className="w-4 h-4 mr-2" />
+                  Settings
+                </Button>
+                <Button size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Message
+                </Button>
+              </div>
+            </div>
 
-              <Card>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Conversations List */}
+              <Card className="lg:col-span-1">
                 <CardHeader className="pb-3">
-                  <CardTitle>Interview Scheduling</CardTitle>
-                  <CardDescription>Propose or confirm slots</CardDescription>
+                  <CardTitle className="text-lg">Conversations</CardTitle>
+                  <CardDescription>Your active conversations</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <Input type="date" />
-                    <Input type="time" />
-                    <Button>Request Slot</Button>
-                  </div>
-                  <div className="text-sm text-muted-foreground">Next scheduled: Friday, 4:30 PM</div>
-                </CardContent>
-              </Card>
-
-              <Card className="lg:col-span-2">
-                <CardHeader className="pb-3">
-                  <CardTitle>Questions & Clarifications</CardTitle>
-                  <CardDescription>Ask and track responses</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-start justify-between border rounded-md p-3">
-                      <div>
-                        <div className="font-medium">Are utilities included?</div>
-                        <div className="text-muted-foreground">Lister: Water and trash included; electricity separate.</div>
-                      </div>
-                      <Badge variant="secondary">Answered</Badge>
+                <CardContent className="p-0">
+                  <ScrollArea className="h-96">
+                    <div className="space-y-1">
+                      {applications.map((app) => (
+                        <div key={app.id} className="p-4 border-b hover:bg-muted/50 cursor-pointer transition-colors">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="w-10 h-10">
+                              <AvatarFallback className="bg-primary/10 text-primary">
+                                {app.landlord.split(' ').map(n => n[0]).join('')}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-medium text-sm truncate">{app.landlord}</h4>
+                                <span className="text-xs text-muted-foreground">
+                                  {app.messages[app.messages.length - 1]?.time.split(' ')[1]}
+                                </span>
+                              </div>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {app.property}
+                              </p>
+                              <p className="text-xs text-muted-foreground truncate">
+                                {app.messages[app.messages.length - 1]?.message}
+                              </p>
+                            </div>
+                            <div className="flex flex-col items-end gap-1">
+                              <Badge variant="outline" className="text-xs">
+                                {app.status}
+                              </Badge>
+                              {app.messages.some(m => m.from === 'landlord') && (
+                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <div className="flex items-start justify-between border rounded-md p-3">
-                      <div>
-                        <div className="font-medium">Is parking available?</div>
-                        <div className="text-muted-foreground">Awaiting response</div>
-                      </div>
-                      <Badge>Pending</Badge>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+
+              {/* Chat Area */}
+              <Card className="lg:col-span-2">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg">Property Management Co.</CardTitle>
+                      <CardDescription>Downtown Studio Apartment</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm">
+                        <Phone className="w-4 h-4 mr-2" />
+                        Call
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Settings className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Input placeholder="Ask a question..." />
-                    <Button>Submit</Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="lg:col-span-2">
-                <CardHeader className="pb-3">
-                  <CardTitle>Document Sharing</CardTitle>
-                  <CardDescription>Send files to listers</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <Input type="file" />
-                    <Input placeholder="Description (optional)" />
-                    <Button>Share</Button>
+                <CardContent className="p-0">
+                  <ScrollArea className="h-80 p-4">
+                    <div className="space-y-4">
+                      {applications[0].messages.map((message, index) => (
+                        <div key={index} className={`flex ${message.from === 'you' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-xs p-3 rounded-lg ${
+                            message.from === 'you' 
+                              ? 'bg-primary text-primary-foreground' 
+                              : 'bg-muted'
+                          }`}>
+                            <p className="text-sm">{message.message}</p>
+                            <p className="text-xs opacity-70 mt-1">{message.time}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                  <div className="p-4 border-t">
+                    <div className="flex gap-2">
+                      <Input placeholder="Type a message..." />
+                      <Button size="sm">
+                        <Send className="w-4 h-4 mr-2" />
+                        Send
+                      </Button>
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground">Allowed types: PDF, JPG, PNG. Max 10MB each.</div>
-                </CardContent>
-              </Card>
-
-              <Card className="lg:col-span-2">
-                <CardHeader className="pb-3">
-                  <CardTitle>Status Notifications</CardTitle>
-                  <CardDescription>Recent updates</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-green-600" /> Your application for Downtown Studio moved to Background Check.</div>
-                  <div className="flex items-center gap-2"><XCircle className="w-4 h-4 text-red-600" /> One document failed verification. Please re-upload.</div>
-                  <div className="flex items-center gap-2"><Clock className="w-4 h-4" /> Interview confirmed for Friday, 4:30 PM.</div>
                 </CardContent>
               </Card>
             </div>
+
+            {/* Quick Actions */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card className="card-hover">
+                <CardContent className="p-4 text-center">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Calendar className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <h3 className="font-semibold mb-1">Schedule Viewing</h3>
+                  <p className="text-sm text-muted-foreground mb-3">Book property tours</p>
+                  <Button size="sm" className="w-full">Schedule</Button>
+                </CardContent>
+              </Card>
+
+              <Card className="card-hover">
+                <CardContent className="p-4 text-center">
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <FileText className="w-6 h-6 text-green-600" />
+                  </div>
+                  <h3 className="font-semibold mb-1">Document Sharing</h3>
+                  <p className="text-sm text-muted-foreground mb-3">Upload files securely</p>
+                  <Button size="sm" variant="outline" className="w-full">Upload</Button>
+                </CardContent>
+              </Card>
+
+              <Card className="card-hover">
+                <CardContent className="p-4 text-center">
+                  <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <MessageSquare className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <h3 className="font-semibold mb-1">Quick Questions</h3>
+                  <p className="text-sm text-muted-foreground mb-3">Ask about property details</p>
+                  <Button size="sm" variant="outline" className="w-full">Ask</Button>
+                </CardContent>
+              </Card>
+
+              <Card className="card-hover">
+                <CardContent className="p-4 text-center">
+                  <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Bell className="w-6 h-6 text-orange-600" />
+                  </div>
+                  <h3 className="font-semibold mb-1">Notifications</h3>
+                  <p className="text-sm text-muted-foreground mb-3">Manage alerts</p>
+                  <Button size="sm" variant="outline" className="w-full">Settings</Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Recent Activity */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Activity</CardTitle>
+                <CardDescription>Latest updates and notifications</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {[
+                    { type: 'message', title: 'New message from Jane Smith', time: '2 hours ago', icon: MessageSquare, color: 'text-blue-600' },
+                    { type: 'document', title: 'Document approved: Financial Statement', time: '4 hours ago', icon: FileText, color: 'text-green-600' },
+                    { type: 'schedule', title: 'Viewing scheduled for tomorrow', time: '1 day ago', icon: Calendar, color: 'text-purple-600' },
+                    { type: 'status', title: 'Application status updated', time: '2 days ago', icon: CheckCircle, color: 'text-orange-600' }
+                  ].map((activity, index) => (
+                    <div key={index} className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className={`w-8 h-8 rounded-full bg-muted flex items-center justify-center`}>
+                        <activity.icon className={`w-4 h-4 ${activity.color}`} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{activity.title}</p>
+                        <p className="text-xs text-muted-foreground">{activity.time}</p>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Application Detail Dialog */}
+        <Dialog open={showApplicationDetail} onOpenChange={setShowApplicationDetail}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl">{selectedApplication?.property}</DialogTitle>
+              <DialogDescription>{selectedApplication?.location}</DialogDescription>
+            </DialogHeader>
+            
+            {selectedApplication && (
+              <div className="space-y-6">
+                {/* Property Overview */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="aspect-video rounded-lg overflow-hidden bg-muted">
+                      <img 
+                        src={selectedApplication.images[0]} 
+                        alt={selectedApplication.property}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-3 border rounded-lg">
+                        <DollarSign className="w-6 h-6 mx-auto mb-2 text-primary" />
+                        <p className="font-semibold">{selectedApplication.rent}</p>
+                        <p className="text-sm text-muted-foreground">Monthly Rent</p>
+                      </div>
+                      <div className="text-center p-3 border rounded-lg">
+                        <Calendar className="w-6 h-6 mx-auto mb-2 text-primary" />
+                        <p className="font-semibold">{new Date(selectedApplication.moveInDate).toLocaleDateString()}</p>
+                        <p className="text-sm text-muted-foreground">Move-in Date</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="font-semibold mb-2">Landlord Information</h3>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Building className="w-4 h-4 text-muted-foreground" />
+                          <span>{selectedApplication.landlord}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-4 h-4 text-muted-foreground" />
+                          <span>{selectedApplication.landlordEmail}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-4 h-4 text-muted-foreground" />
+                          <span>{selectedApplication.landlordPhone}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h3 className="font-semibold mb-2">Amenities</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedApplication.amenities.map((amenity, index) => (
+                          <Badge key={index} variant="secondary">{amenity}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Application Timeline */}
+                <div>
+                  <h3 className="font-semibold mb-4">Application Timeline</h3>
+                  <div className="space-y-4">
+                    {selectedApplication.timeline.map((step, index) => (
+                      <div key={index} className="flex items-center gap-4">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                          step.status === 'completed' 
+                            ? 'bg-green-500 text-white' 
+                            : step.status === 'in_progress'
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-muted text-muted-foreground'
+                        }`}>
+                          {step.status === 'completed' ? (
+                            <CheckCircle className="w-4 h-4" />
+                          ) : step.status === 'in_progress' ? (
+                            <Clock className="w-4 h-4" />
+                          ) : (
+                            <AlertCircle className="w-4 h-4" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-medium">{step.event}</h4>
+                            <span className="text-sm text-muted-foreground">
+                              {new Date(step.date).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {step.status === 'completed' && 'Completed successfully'}
+                            {step.status === 'in_progress' && 'Currently in progress'}
+                            {step.status === 'pending' && 'Awaiting processing'}
+                            {step.status === 'failed' && 'Requires attention'}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Messages */}
+                <div>
+                  <h3 className="font-semibold mb-4">Messages</h3>
+                  <ScrollArea className="h-48 border rounded-lg p-4">
+                    <div className="space-y-3">
+                      {selectedApplication.messages.map((message, index) => (
+                        <div key={index} className={`flex ${message.from === 'you' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-xs p-3 rounded-lg ${
+                            message.from === 'you' 
+                              ? 'bg-primary text-primary-foreground' 
+                              : 'bg-muted'
+                          }`}>
+                            <p className="text-sm">{message.message}</p>
+                            <p className="text-xs opacity-70 mt-1">{message.time}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                  <div className="flex gap-2 mt-4">
+                    <Input placeholder="Type a message..." />
+                    <Button size="sm">
+                      <Send className="w-4 h-4 mr-2" />
+                      Send
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Withdraw Application Dialog */}
+        <Dialog open={showWithdrawDialog} onOpenChange={setShowWithdrawDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Withdraw Application</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to withdraw this application? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowWithdrawDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={() => handleWithdrawApplication(1)}>
+                Withdraw Application
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Update Application Dialog */}
+        <Dialog open={showUpdateDialog} onOpenChange={setShowUpdateDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Update Application</DialogTitle>
+              <DialogDescription>
+                Make changes to your application information.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Additional Notes</Label>
+                <Textarea placeholder="Add any additional information..." />
+              </div>
+              <div>
+                <Label>Upload Additional Documents</Label>
+                <Input type="file" multiple />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowUpdateDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => setShowUpdateDialog(false)}>
+                Update Application
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
