@@ -1,0 +1,211 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 210 29% 24%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 210 29% 24%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 29% 24%;
+
+    --primary: 174 62% 47%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 174 62% 55%;
+    --primary-dark: 174 62% 40%;
+
+    --secondary: 196 50% 94%;
+    --secondary-foreground: 210 29% 24%;
+
+    --muted: 210 20% 96%;
+    --muted-foreground: 210 12% 50%;
+
+    --accent: 158 64% 52%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 20% 92%;
+    --input: 210 20% 92%;
+    --ring: 174 62% 47%;
+
+    --success: 120 60% 50%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 43 96% 56%;
+    --warning-foreground: 210 29% 24%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(174 62% 47%), hsl(158 64% 52%));
+    --gradient-hero: linear-gradient(135deg, hsl(174 62% 47%) 0%, hsl(196 78% 52%) 50%, hsl(158 64% 52%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(210 20% 98%) 100%);
+    
+    /* Shadows */
+    --shadow-soft: 0 4px 20px -4px hsl(174 62% 47% / 0.15);
+    --shadow-medium: 0 8px 30px -8px hsl(174 62% 47% / 0.25);
+    --shadow-strong: 0 16px 40px -12px hsl(174 62% 47% / 0.35);
+    
+    /* Animation */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 210 29% 10%;
+    --foreground: 210 20% 96%;
+
+    --card: 210 29% 12%;
+    --card-foreground: 210 20% 96%;
+
+    --popover: 210 29% 12%;
+    --popover-foreground: 210 20% 96%;
+
+    --primary: 174 62% 55%;
+    --primary-foreground: 210 29% 10%;
+    --primary-light: 174 62% 65%;
+    --primary-dark: 174 62% 45%;
+
+    --secondary: 210 29% 16%;
+    --secondary-foreground: 210 20% 96%;
+
+    --muted: 210 29% 16%;
+    --muted-foreground: 210 12% 65%;
+
+    --accent: 158 64% 60%;
+    --accent-foreground: 210 29% 10%;
+
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 210 20% 96%;
+
+    --border: 210 29% 20%;
+    --input: 210 29% 20%;
+    --ring: 174 62% 55%;
+
+    --success: 120 60% 55%;
+    --success-foreground: 210 29% 10%;
+    
+    --warning: 43 96% 60%;
+    --warning-foreground: 210 29% 10%;
+
+    /* Dark mode gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(174 62% 55%), hsl(158 64% 60%));
+    --gradient-hero: linear-gradient(135deg, hsl(174 62% 55%) 0%, hsl(196 78% 60%) 50%, hsl(158 64% 60%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(210 29% 12%) 0%, hsl(210 29% 16%) 100%);
+    
+    /* Dark shadows */
+    --shadow-soft: 0 4px 20px -4px hsl(0 0% 0% / 0.3);
+    --shadow-medium: 0 8px 30px -8px hsl(0 0% 0% / 0.4);
+    --shadow-strong: 0 16px 40px -12px hsl(0 0% 0% / 0.5);
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary/30 rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary/50;
+  }
+}
+
+@layer components {
+  /* Hero button styles */
+  .btn-hero {
+    @apply bg-gradient-to-r from-primary to-accent text-primary-foreground;
+    @apply px-8 py-4 rounded-full font-semibold text-lg;
+    @apply shadow-[var(--shadow-medium)] hover:shadow-[var(--shadow-strong)];
+    @apply transition-all duration-300 hover:scale-105;
+    @apply border-0 hover:brightness-110;
+  }
+  
+  /* Card with gradient background */
+  .card-gradient {
+    background: var(--gradient-card);
+    box-shadow: var(--shadow-soft);
+    @apply rounded-3xl border border-border/50;
+  }
+  
+  /* Decorative elements */
+  .shape-blob {
+    @apply absolute rounded-full opacity-20;
+    background: var(--gradient-primary);
+    filter: blur(40px);
+  }
+  
+  /* Text gradients */
+  .text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Section spacing */
+  .section-padding {
+    @apply py-16 md:py-24;
+  }
+  
+  /* Hover animations */
+  .hover-lift {
+    @apply transition-all duration-300 hover:translate-y-[-4px] hover:shadow-[var(--shadow-medium)];
+  }
+}
