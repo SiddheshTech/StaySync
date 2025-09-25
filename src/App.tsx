@@ -22,17 +22,14 @@ import MessagesPage from "./pages/student/MessagesPage";
 import ApplicationsPage from "./pages/student/ApplicationsPage";
 import SearchPage from "./pages/SearchPage";
 import NotFound from "./pages/NotFound";
-<<<<<<< HEAD
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminStudentsPage from "./pages/admin/AdminStudentsPage";
 import AdminReportsPage from "./pages/admin/AdminReportsPage";
 import AdminModerationPage from "./pages/admin/AdminModerationPage";
 import AdminSupportPage from "./pages/admin/AdminSupportPage";
-=======
 import NavigationPage from "./pages/NavigationPage";
 import CreateListingPage from "./pages/CreateListingPage";
->>>>>>> origin/aryan
 
 const queryClient = new QueryClient();
 

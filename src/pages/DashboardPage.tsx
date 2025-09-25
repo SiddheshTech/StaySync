@@ -11,7 +11,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { Input } from '@/components/ui/input';
 import { Line, LineChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Bar, BarChart } from 'recharts';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+// duplicate import removed
 import { Textarea } from '@/components/ui/textarea';
 import { 
   Select,
@@ -214,13 +214,11 @@ const DashboardPage = () => {
                 <Link to="/search" className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors">
                   <Search className="w-4 h-4" /> Browse Listings
                 </Link>
-<<<<<<< HEAD
                 <Link to="/student/community" className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors">
                   <Users className="w-4 h-4" /> Community
-=======
+                </Link>
                 <Link to="/create-listing" className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors">
                   <Plus className="w-4 h-4" /> Create New Listing
->>>>>>> origin/aryan
                 </Link>
                 <Link to="/messages" className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors">
                   <MessageSquare className="w-4 h-4" /> Messages
