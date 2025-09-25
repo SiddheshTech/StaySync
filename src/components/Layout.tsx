@@ -9,7 +9,8 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   const { pathname } = useLocation();
-  const hideChrome = pathname === '/dashboard';
+  const sidebarRoutes = ['/dashboard', '/profile', '/messages', '/applications', '/billing', '/help'];
+  const hideChrome = sidebarRoutes.some((prefix) => pathname.startsWith(prefix));
   return (
     <div className="min-h-screen flex flex-col">
       {!hideChrome && <Header />}
