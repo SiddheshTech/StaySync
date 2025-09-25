@@ -14,6 +14,7 @@ const Header = () => {
     { name: 'Safety', href: '/safety', icon: Shield },
     { name: 'Universities', href: '/universities', icon: Building },
     { name: 'Pricing', href: '/pricing', icon: DollarSign },
+    { name: 'Admin', href: '/admin', icon: Shield },
   ];
 
   const isActive = (path: string) => location.pathname === path;

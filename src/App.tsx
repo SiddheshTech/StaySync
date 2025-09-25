@@ -19,6 +19,12 @@ import MessagesPage from "./pages/MessagesPage";
 import ApplicationsPage from "./pages/ApplicationsPage";
 import SearchPage from "./pages/SearchPage";
 import NotFound from "./pages/NotFound";
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import AdminStudentsPage from "./pages/admin/AdminStudentsPage";
+import AdminReportsPage from "./pages/admin/AdminReportsPage";
+import AdminModerationPage from "./pages/admin/AdminModerationPage";
+import AdminSupportPage from "./pages/admin/AdminSupportPage";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +50,13 @@ const App = () => (
             <Route path="/messages" element={<MessagesPage />} />
             <Route path="/applications" element={<ApplicationsPage />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboardPage />} />
+              <Route path="students" element={<AdminStudentsPage />} />
+              <Route path="reports" element={<AdminReportsPage />} />
+              <Route path="moderation" element={<AdminModerationPage />} />
+              <Route path="support" element={<AdminSupportPage />} />
+            </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
