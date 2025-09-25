@@ -12,11 +12,14 @@ import UniversityPartnersPage from "./pages/UniversityPartnersPage";
 import PricingPage from "./pages/PricingPage";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
-import DashboardPage from "./pages/DashboardPage";
-import ProfilePage from "./pages/ProfilePage";
-import EditProfilePage from "./pages/EditProfilePage";
-import MessagesPage from "./pages/MessagesPage";
-import ApplicationsPage from "./pages/ApplicationsPage";
+import DashboardPage from "./pages/student/DashboardPage";
+import HelpPage from "./pages/HelpPage";
+import ContactSupportPage from "./pages/ContactSupportPage";
+import CommunityPage from "./pages/student/CommunityPage";
+import ProfilePage from "./pages/student/ProfilePage";
+import EditProfilePage from "./pages/student/EditProfilePage";
+import MessagesPage from "./pages/student/MessagesPage";
+import ApplicationsPage from "./pages/student/ApplicationsPage";
 import SearchPage from "./pages/SearchPage";
 import NotFound from "./pages/NotFound";
 import AdminLayout from "./pages/admin/AdminLayout";
@@ -45,6 +48,9 @@ const App = () => (
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/help" element={<HelpPage />} />
+            <Route path="/support" element={<ContactSupportPage />} />
+            <Route path="/student/community" element={<CommunityPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/profile/edit/:section" element={<EditProfilePage />} />
             <Route path="/messages" element={<MessagesPage />} />

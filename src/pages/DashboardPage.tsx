@@ -8,6 +8,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Line, LineChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Bar, BarChart } from 'recharts';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from '@/components/ui/use-toast';
 import { 
   Bell, 
   MessageSquare, 
@@ -25,8 +40,76 @@ import {
   LogOut
 } from 'lucide-react';
 
+const applicationSchema = z.object({
+  // Applicant Information
+  firstName: z.string().min(1, 'First name is required'),
+  lastName: z.string().min(1, 'Last name is required'),
+  email: z.string().email('Enter a valid email'),
+  phone: z.string().min(7, 'Enter a valid phone'),
+  university: z.string().min(1, 'University is required'),
+  studentId: z.string().min(1, 'Student ID is required'),
+  // References
+  refName: z.string().min(1, 'Reference name is required'),
+  refRelationship: z.string().min(1, 'Relationship is required'),
+  refPhone: z.string().min(7, 'Reference phone is required'),
+  refEmail: z.string().email('Enter a valid email'),
+  // Financial
+  monthlyBudget: z.string().min(1, 'Monthly budget is required'),
+  incomeSource: z.string().min(1, 'Income source is required'),
+  guarantor: z.string().optional(),
+  // Housing history
+  prevAddress: z.string().optional(),
+  livingExperience: z.string().optional(),
+  // Roommate compatibility
+  cleanliness: z.string().min(1, 'Select cleanliness level'),
+  noiseTolerance: z.string().min(1, 'Select noise tolerance'),
+  sleepSchedule: z.string().min(1, 'Select sleep schedule'),
+  allergies: z.string().optional(),
+  // Move-in timeline
+  targetMoveIn: z.string().min(1, 'Select timeline'),
+  stayLength: z.string().min(1, 'Select expected stay length'),
+  notes: z.string().optional(),
+});
+
+type ApplicationFormValues = z.infer<typeof applicationSchema>;
+
 const DashboardPage = () => {
   const location = useLocation();
+  const form = useForm<ApplicationFormValues>({
+    resolver: zodResolver(applicationSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      university: '',
+      studentId: '',
+      refName: '',
+      refRelationship: '',
+      refPhone: '',
+      refEmail: '',
+      monthlyBudget: '',
+      incomeSource: '',
+      guarantor: '',
+      prevAddress: '',
+      livingExperience: '',
+      cleanliness: '',
+      noiseTolerance: '',
+      sleepSchedule: '',
+      allergies: '',
+      targetMoveIn: '',
+      stayLength: '',
+      notes: '',
+    }
+  });
+
+  const onSubmit = (values: ApplicationFormValues) => {
+    console.log('Application submitted', values);
+    toast({
+      title: 'Application submitted',
+      description: 'We will review your application and follow up shortly.'
+    });
+  };
   return (
     <div className="min-h-screen bg-gradient-subtle">
       {/* Full-width brand bar */}
@@ -58,6 +141,9 @@ const DashboardPage = () => {
                 </Link>
                 <Link to="/search" className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors">
                   <Search className="w-4 h-4" /> Browse Listings
+                </Link>
+                <Link to="/student/community" className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors">
+                  <Users className="w-4 h-4" /> Community
                 </Link>
                 <Link to="/messages" className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors">
                   <MessageSquare className="w-4 h-4" /> Messages
@@ -113,6 +199,20 @@ const DashboardPage = () => {
                 </Link>
               </div>
             </div>
+
+            {/* Application Quick Access */}
+            <Card className="mb-8 card-hover">
+              <CardHeader className="pb-3">
+                <CardTitle>Start a New Application</CardTitle>
+                <CardDescription>Fill out your details to apply and book viewings</CardDescription>
+              </CardHeader>
+              <CardContent className="flex items-center justify-between gap-4">
+                <div className="text-sm text-muted-foreground">It takes about 5-10 minutes to complete.</div>
+                <Link to="/student/application">
+                  <Button className="btn-hero">Open Application Form</Button>
+                </Link>
+              </CardContent>
+            </Card>
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
