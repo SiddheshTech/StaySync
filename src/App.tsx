@@ -20,6 +20,7 @@ import ApplicationsPage from "./pages/ApplicationsPage";
 import SearchPage from "./pages/SearchPage";
 import NotFound from "./pages/NotFound";
 import NavigationPage from "./pages/NavigationPage";
+import CreateListingPage from "./pages/CreateListingPage";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/universities" element={<UniversityPartnersPage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/navigation" element={<NavigationPage />} />
+            <Route path="/create-listing" element={<CreateListingPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
