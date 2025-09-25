@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,11 +24,14 @@ import { useToast } from '@/hooks/use-toast';
 const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [searchParams] = useSearchParams();
+  const typeParam = searchParams.get('type');
+  const defaultLoginType = (typeParam === 'university' ? 'university' : 'student') as 'student' | 'university';
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     rememberMe: false,
-    loginType: 'student' as 'student' | 'university'
+    loginType: defaultLoginType
   });
   const { toast } = useToast();
 

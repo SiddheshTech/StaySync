@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { Input } from '@/components/ui/input';
 import { Line, LineChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Bar, BarChart } from 'recharts';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -37,7 +39,30 @@ import {
   Activity,
   Home,
   Star,
-  LogOut
+  LogOut,
+  MapPin,
+  DollarSign,
+  Grid3X3,
+  Filter,
+  List,
+  Eye,
+  Upload,
+  Video,
+  Phone,
+  MoreVertical,
+  Paperclip,
+  Smile,
+  Mic,
+  Plus,
+  Send,
+  Globe,
+  Clock,
+  Accessibility,
+  PawPrint,
+  Car,
+  Bed,
+  X,
+  Wifi
 } from 'lucide-react';
 
 const applicationSchema = z.object({
@@ -74,6 +99,53 @@ const applicationSchema = z.object({
 type ApplicationFormValues = z.infer<typeof applicationSchema>;
 
 const DashboardPage = () => {
+  // Local state for embedded Navigation section
+  const [navViewMode, setNavViewMode] = useState<'grid' | 'list'>('grid');
+  const [navShowFilters, setNavShowFilters] = useState(false);
+
+  // Sample data (shared with Navigation section)
+  const navProperties = [
+    {
+      id: 1,
+      title: 'Modern Studio Near Campus',
+      price: 1200,
+      location: 'Downtown',
+      distance: '0.5 miles from campus',
+      rating: 4.8,
+      images: ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300&h=200&fit=crop'],
+      amenities: ['Wifi', 'Laundry', 'Parking'],
+      roommates: 0,
+      available: '2024-08-01',
+      compatibility: 92,
+    },
+    {
+      id: 2,
+      title: 'Shared Apartment with International Students',
+      price: 800,
+      location: 'University District',
+      distance: '0.2 miles from campus',
+      rating: 4.6,
+      images: ['https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=300&h=200&fit=crop'],
+      amenities: ['Wifi', 'Kitchen', 'Study Room'],
+      roommates: 2,
+      available: '2024-09-01',
+      compatibility: 87,
+    },
+    {
+      id: 3,
+      title: 'Luxury Single Room with Balcony',
+      price: 1500,
+      location: 'City Center',
+      distance: '1.2 miles from campus',
+      rating: 4.9,
+      images: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=300&h=200&fit=crop'],
+      amenities: ['Gym', 'Pool', 'Concierge'],
+      roommates: 0,
+      available: '2024-07-15',
+      compatibility: 95,
+    },
+  ];
+
   const location = useLocation();
   const form = useForm<ApplicationFormValues>({
     resolver: zodResolver(applicationSchema),
@@ -142,8 +214,13 @@ const DashboardPage = () => {
                 <Link to="/search" className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors">
                   <Search className="w-4 h-4" /> Browse Listings
                 </Link>
+<<<<<<< HEAD
                 <Link to="/student/community" className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors">
                   <Users className="w-4 h-4" /> Community
+=======
+                <Link to="/create-listing" className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors">
+                  <Plus className="w-4 h-4" /> Create New Listing
+>>>>>>> origin/aryan
                 </Link>
                 <Link to="/messages" className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors">
                   <MessageSquare className="w-4 h-4" /> Messages
@@ -399,6 +476,7 @@ const DashboardPage = () => {
             </Tabs>
           </CardContent>
         </Card>
+
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}

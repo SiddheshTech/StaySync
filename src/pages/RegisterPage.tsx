@@ -477,8 +477,12 @@ const RegisterPage = () => {
                 <div className="text-center pt-6 border-t">
                   <p className="text-muted-foreground">
                     Already have an account?{' '}
-                    <Link to="/login" className="text-primary hover:underline font-medium">
-                      Sign in here
+                    <Link to="/login?type=student" className="text-primary hover:underline font-medium">
+                      Student sign in
+                    </Link>
+                    {' '}or{' '}
+                    <Link to="/login?type=university" className="text-primary hover:underline font-medium">
+                      University portal
                     </Link>
                   </p>
                 </div>
