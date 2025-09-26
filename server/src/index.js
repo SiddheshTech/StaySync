@@ -26,6 +26,73 @@ app.get('/health', (_req, res) => {
 app.use('/auth', authRouter);
 app.use('/', authRouter);
 
+// Student profile routes
+app.get('/student/profile', authMiddleware, async (req, res) => {
+  try {
+    const student = await Student.findById(req.userId).lean();
+    if (!student) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+    res.json({
+      id: String(student._id),
+      name: student.name,
+      email: student.email,
+      university: student.university,
+      avatarUrl: student.avatarUrl,
+      verified: !!student.verified,
+      provider: student.provider,
+      stats: student.stats || undefined,
+      profile: student.profile || {}
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to load profile' });
+  }
+});
+
+app.put('/student/profile', authMiddleware, async (req, res) => {
+  try {
+    const body = req.body || {};
+    const setUpdate = {};
+    const topLevelAllowed = ['name', 'university', 'avatarUrl'];
+    for (const key of topLevelAllowed) {
+      if (Object.prototype.hasOwnProperty.call(body, key)) setUpdate[key] = body[key];
+    }
+    if (body.profile && typeof body.profile === 'object') {
+      const profileKeys = ['personal','academic','lifestyle','housing','privacy','verification'];
+      for (const section of profileKeys) {
+        if (Object.prototype.hasOwnProperty.call(body.profile, section)) {
+          setUpdate[`profile.${section}`] = body.profile[section];
+        }
+      }
+    }
+    if (Object.keys(setUpdate).length === 0) {
+      res.status(400).json({ error: 'No valid fields provided' });
+      return;
+    }
+    const updated = await Student.findByIdAndUpdate(req.userId, { $set: setUpdate }, { new: true, runValidators: true }).lean();
+    if (!updated) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+    res.json({
+      id: String(updated._id),
+      name: updated.name,
+      email: updated.email,
+      university: updated.university,
+      avatarUrl: updated.avatarUrl,
+      verified: !!updated.verified,
+      provider: updated.provider,
+      stats: updated.stats || undefined,
+      profile: updated.profile || {}
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
+});
+
 // Student dashboard route
 app.get('/student/dashboard', async (req, res) => {
   try {

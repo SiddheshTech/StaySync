@@ -53,6 +53,74 @@ const studentSchema = new mongoose.Schema(
       messagesUnread: { type: Number, default: 0 },
       documentsPending: { type: Number, default: 0 }
     },
+    // Profile sections
+    profile: {
+      personal: {
+        phone: { type: String, default: '' },
+        pronouns: { type: String, default: '' },
+        dob: { type: Date },
+        emergencyContact: { type: String, default: '' },
+        socialLinks: { type: [String], default: [] }
+      },
+      academic: {
+        major: { type: String, default: '' },
+        minor: { type: String, default: '' },
+        year: { type: String, enum: ['freshman','sophomore','junior','senior','graduate',''], default: '' },
+        expectedGraduation: { type: String, default: '' },
+        gpaVisibility: { type: String, enum: ['hide','show'], default: 'hide' },
+        studyAbroad: { type: String, default: '' },
+        researchInternships: { type: String, default: '' }
+      },
+      lifestyle: {
+        cleanliness: { type: String, default: '' },
+        noiseLevel: { type: String, default: '' },
+        sleepSchedule: { type: String, default: '' },
+        socialLevel: { type: String, default: '' },
+        interests: { type: [String], default: [] },
+        dailyRoutine: {
+          wakeUp: { type: String, default: '' },
+          study: { type: String, default: '' },
+          exercise: { type: String, default: '' },
+          sleep: { type: String, default: '' }
+        },
+        questionnaire: {
+          smoking: { type: String, default: '' },
+          pets: { type: String, default: '' },
+          guests: { type: String, default: '' },
+          parties: { type: String, default: '' },
+          quietHours: { type: String, default: '' }
+        },
+        socialPrefs: {
+          events: { type: Boolean, default: false },
+          studyWithOthers: { type: Boolean, default: false },
+          shareChores: { type: Boolean, default: false }
+        }
+      },
+      housing: {
+        budgetRange: { type: String, default: '' },
+        preferredLocations: { type: [String], default: [] },
+        roomType: { type: String, default: '' },
+        moveInDate: { type: String, default: '' },
+        leaseLength: { type: String, default: '' },
+        transportation: { type: String, default: '' },
+        amenities: { type: [String], default: [] }
+      },
+      privacy: {
+        visibility: { type: String, enum: ['public','matches','verified'], default: 'matches' },
+        controls: {
+          photo: { type: String, enum: ['public','matches','verified','private'], default: 'matches' },
+          contact: { type: String, enum: ['public','matches','verified','private'], default: 'matches' },
+          academic: { type: String, enum: ['public','matches','verified','private'], default: 'matches' },
+          lifestyle: { type: String, enum: ['public','matches','verified','private'], default: 'matches' }
+        },
+        security: {
+          twoFactor: { type: Boolean, default: false }
+        }
+      },
+      verification: {
+        progress: { type: Number, default: 0 }
+      }
+    },
     recentApplications: [
       {
         listingTitle: String,

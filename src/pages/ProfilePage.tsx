@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { apiGet, apiPost } from '@/lib/api';
 import { Calendar } from '@/components/ui/calendar';
 import { 
   ArrowLeft,
@@ -42,11 +43,45 @@ import {
 
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState('personal');
+  const [profile, setProfile] = useState<any>(null);
   const [showPhotoDialog, setShowPhotoDialog] = useState(false);
   const [verificationProgress, setVerificationProgress] = useState(65);
   const [twoFAEnabled, setTwoFAEnabled] = useState(true);
   const [profileVisibility, setProfileVisibility] = useState<'public' | 'matches' | 'verified'>('matches');
   const [dob, setDob] = useState<Date | undefined>(new Date('2002-03-15'));
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const baseUrl = (import.meta as any).env?.VITE_API_URL || `${location.protocol}//${location.hostname}:8080`;
+        const token = localStorage.getItem('auth_token');
+        const res = await fetch(`${baseUrl}/student/profile`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+        if (!res.ok) return;
+        const data = await res.json();
+        setProfile(data);
+        if (data?.profile?.personal?.dob) {
+          const parsed = new Date(data.profile.personal.dob);
+          if (!isNaN(parsed.getTime())) setDob(parsed);
+        }
+      } catch {}
+    };
+    load();
+  }, []);
+
+  const saveProfile = async (payload: any) => {
+    try {
+      const baseUrl = (import.meta as any).env?.VITE_API_URL || `${location.protocol}//${location.hostname}:8080`;
+      const token = localStorage.getItem('auth_token');
+      const res = await fetch(`${baseUrl}/student/profile`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      setProfile(data);
+    } catch {}
+  };
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
@@ -72,7 +107,7 @@ const ProfilePage = () => {
             <div className="flex flex-col sm:flex-row items-start gap-6">
               <div className="relative">
                 <Avatar className="w-24 h-24 ring-4 ring-white/60 rounded-full">
-                  <AvatarFallback className="bg-primary/10 text-primary text-2xl">SJ</AvatarFallback>
+                  <AvatarFallback className="bg-primary/10 text-primary text-2xl">{(profile?.name || 'Student').split(' ').map((p: string) => p[0]).slice(0,2).join('').toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <Button size="sm" className="absolute -bottom-2 -right-2 rounded-full w-8 h-8 p-0" onClick={() => setShowPhotoDialog(true)}>
                   <Camera className="w-4 h-4" />
@@ -82,8 +117,8 @@ const ProfilePage = () => {
               <div className="flex-1">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h2 className="text-2xl font-bold">Sarah Johnson</h2>
-                    <p className="text-muted-foreground">Computer Science • Junior • UC Berkeley</p>
+                    <h2 className="text-2xl font-bold">{profile?.name || 'Student'}</h2>
+                    <p className="text-muted-foreground">{profile?.university || 'Your University'}</p>
                     <div className="flex gap-2 mt-2">
                       <Badge variant="secondary" className="flex items-center gap-1">
                         <Check className="w-3 h-3" />
@@ -154,25 +189,25 @@ const ProfilePage = () => {
                   <div className="space-y-4">
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Full Name</label>
-                      <Input defaultValue="Sarah Elizabeth Johnson" />
+                      <Input value={profile?.name || ''} onChange={(e) => setProfile((p: any) => ({ ...p, name: e.target.value }))} />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Email</label>
                       <div className="flex items-center gap-2">
-                        <Input type="email" defaultValue="sarah.johnson@berkeley.edu" />
+                        <Input type="email" value={profile?.email || ''} readOnly />
                         <Badge variant="secondary" className="flex items-center gap-1"><Mail className="w-3 h-3" /> Verified</Badge>
                       </div>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Phone</label>
                       <div className="flex items-center gap-2">
-                        <Input defaultValue="(555) 123-4567" />
+                        <Input value={profile?.profile?.personal?.phone || ''} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, personal: { ...p?.profile?.personal, phone: e.target.value } } }))} />
                         <Badge variant="secondary" className="flex items-center gap-1"><Phone className="w-3 h-3" /> Verified</Badge>
                       </div>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Pronouns</label>
-                      <Select defaultValue="sheher">
+                      <Select value={profile?.profile?.personal?.pronouns || ''} onValueChange={(v) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, personal: { ...p?.profile?.personal, pronouns: v } } }))}>
                         <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="sheher">She/Her</SelectItem>
@@ -186,20 +221,20 @@ const ProfilePage = () => {
                   <div className="space-y-4">
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Date of Birth</label>
-                      <Calendar selected={dob} onSelect={setDob} mode="single" className="rounded-md border" />
+                      <Calendar selected={dob} onSelect={(d) => { setDob(d); setProfile((p: any) => ({ ...p, profile: { ...p?.profile, personal: { ...p?.profile?.personal, dob: d ? d.toISOString() : undefined } } })); }} mode="single" className="rounded-md border" />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Emergency Contact</label>
-                      <Input defaultValue="Mary Johnson (Mom) - (555) 987-6543" />
+                      <Input value={profile?.profile?.personal?.emergencyContact || ''} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, personal: { ...p?.profile?.personal, emergencyContact: e.target.value } } }))} />
                     </div>
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Social Media Links</label>
-                      <Input defaultValue="@sarahj_codes (Instagram)" />
+                      <Input value={(profile?.profile?.personal?.socialLinks?.[0] || '')} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, personal: { ...p?.profile?.personal, socialLinks: [e.target.value] } } }))} />
                     </div>
                   </div>
                 </CardContent>
                 <div className="px-6 pb-6">
-                  <Button className="btn-hero">Save Personal Info</Button>
+                  <Button className="btn-hero" onClick={() => saveProfile({ name: profile?.name, profile: { personal: profile?.profile?.personal } })}>Save Personal Info</Button>
                 </div>
               </Card>
             </div>
@@ -223,19 +258,19 @@ const ProfilePage = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">University</label>
-                    <Input defaultValue="University of California, Berkeley" />
+                    <Input value={profile?.university || ''} onChange={(e) => setProfile((p: any) => ({ ...p, university: e.target.value }))} />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Major</label>
-                    <Input defaultValue="Computer Science" />
+                    <Input value={profile?.profile?.academic?.major || ''} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, academic: { ...p?.profile?.academic, major: e.target.value } } }))} />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Minor</label>
-                    <Input defaultValue="Mathematics" />
+                    <Input value={profile?.profile?.academic?.minor || ''} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, academic: { ...p?.profile?.academic, minor: e.target.value } } }))} />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Academic Year</label>
-                    <Select defaultValue="junior">
+                    <Select value={profile?.profile?.academic?.year || ''} onValueChange={(v) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, academic: { ...p?.profile?.academic, year: v } } }))}>
                       <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="freshman">Freshman</SelectItem>
@@ -250,11 +285,11 @@ const ProfilePage = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Expected Graduation</label>
-                    <Input defaultValue="May 2025" />
+                    <Input value={profile?.profile?.academic?.expectedGraduation || ''} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, academic: { ...p?.profile?.academic, expectedGraduation: e.target.value } } }))} />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">GPA</label>
-                    <Select defaultValue="hide">
+                    <Select value={profile?.profile?.academic?.gpaVisibility || 'hide'} onValueChange={(v) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, academic: { ...p?.profile?.academic, gpaVisibility: v } } }))}>
                       <SelectTrigger><SelectValue placeholder="Disclosure" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="hide">Hide GPA</SelectItem>
@@ -264,16 +299,16 @@ const ProfilePage = () => {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Study Abroad Plans</label>
-                    <Input defaultValue="Spring 2024 - Edinburgh, Scotland" />
+                    <Input value={profile?.profile?.academic?.studyAbroad || ''} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, academic: { ...p?.profile?.academic, studyAbroad: e.target.value } } }))} />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Research/Internships</label>
-                    <Textarea defaultValue="ML Research Lab, Google Summer Intern 2023" />
+                    <Textarea value={profile?.profile?.academic?.researchInternships || ''} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, academic: { ...p?.profile?.academic, researchInternships: e.target.value } } }))} />
                   </div>
                 </div>
               </CardContent>
               <div className="px-6 pb-6">
-                <Button className="btn-hero">Save Academic Info</Button>
+                <Button className="btn-hero" onClick={() => saveProfile({ university: profile?.university, profile: { academic: profile?.profile?.academic } })}>Save Academic Info</Button>
               </div>
             </Card>
           </TabsContent>
@@ -299,19 +334,19 @@ const ProfilePage = () => {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-sm">Cleanliness</span>
-                        <Badge variant="secondary">Very Clean</Badge>
+                        <Input className="w-40" value={profile?.profile?.lifestyle?.cleanliness || ''} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, lifestyle: { ...p?.profile?.lifestyle, cleanliness: e.target.value } } }))} />
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">Noise Level</span>
-                        <Badge variant="secondary">Quiet</Badge>
+                        <Input className="w-40" value={profile?.profile?.lifestyle?.noiseLevel || ''} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, lifestyle: { ...p?.profile?.lifestyle, noiseLevel: e.target.value } } }))} />
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">Sleep Schedule</span>
-                        <Badge variant="secondary">Early Bird</Badge>
+                        <Input className="w-40" value={profile?.profile?.lifestyle?.sleepSchedule || ''} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, lifestyle: { ...p?.profile?.lifestyle, sleepSchedule: e.target.value } } }))} />
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm">Social Level</span>
-                        <Badge variant="secondary">Moderately Social</Badge>
+                        <Input className="w-40" value={profile?.profile?.lifestyle?.socialLevel || ''} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, lifestyle: { ...p?.profile?.lifestyle, socialLevel: e.target.value } } }))} />
                       </div>
                     </div>
                   </div>
@@ -319,9 +354,7 @@ const ProfilePage = () => {
                   <div className="space-y-4">
                     <h4 className="font-semibold">Interests & Hobbies</h4>
                     <div className="flex flex-wrap gap-2">
-                      {['Coding', 'Reading', 'Yoga', 'Hiking', 'Coffee', 'Gaming', 'Movies', 'Music'].map((interest) => (
-                        <Badge key={interest} variant="outline">{interest}</Badge>
-                      ))}
+                      <Input value={(profile?.profile?.lifestyle?.interests || []).join(', ')} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, lifestyle: { ...p?.profile?.lifestyle, interests: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) } } }))} />
                     </div>
                   </div>
                 </div>
@@ -331,19 +364,19 @@ const ProfilePage = () => {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">Wake up:</span>
-                      <p>6:30 AM</p>
+                      <Input value={profile?.profile?.lifestyle?.dailyRoutine?.wakeUp || ''} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, lifestyle: { ...p?.profile?.lifestyle, dailyRoutine: { ...p?.profile?.lifestyle?.dailyRoutine, wakeUp: e.target.value } } } }))} />
                     </div>
                     <div>
                       <span className="text-muted-foreground">Study time:</span>
-                      <p>9 AM - 3 PM</p>
+                      <Input value={profile?.profile?.lifestyle?.dailyRoutine?.study || ''} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, lifestyle: { ...p?.profile?.lifestyle, dailyRoutine: { ...p?.profile?.lifestyle?.dailyRoutine, study: e.target.value } } } }))} />
                     </div>
                     <div>
                       <span className="text-muted-foreground">Exercise:</span>
-                      <p>4 PM - 5 PM</p>
+                      <Input value={profile?.profile?.lifestyle?.dailyRoutine?.exercise || ''} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, lifestyle: { ...p?.profile?.lifestyle, dailyRoutine: { ...p?.profile?.lifestyle?.dailyRoutine, exercise: e.target.value } } } }))} />
                     </div>
                     <div>
                       <span className="text-muted-foreground">Sleep:</span>
-                      <p>10:30 PM</p>
+                      <Input value={profile?.profile?.lifestyle?.dailyRoutine?.sleep || ''} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, lifestyle: { ...p?.profile?.lifestyle, dailyRoutine: { ...p?.profile?.lifestyle?.dailyRoutine, sleep: e.target.value } } } }))} />
                     </div>
                   </div>
                 </div>
@@ -351,10 +384,16 @@ const ProfilePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <h4 className="font-semibold">Compatibility Questionnaire</h4>
-                    {['Smoking', 'Pets', 'Guests', 'Parties', 'Quiet Hours'].map((q) => (
-                      <div key={q} className="flex items-center justify-between">
-                        <span className="text-sm">{q}</span>
-                        <Select defaultValue="sometimes">
+                    {[
+                      { key: 'smoking', label: 'Smoking' },
+                      { key: 'pets', label: 'Pets' },
+                      { key: 'guests', label: 'Guests' },
+                      { key: 'parties', label: 'Parties' },
+                      { key: 'quietHours', label: 'Quiet Hours' },
+                    ].map((q) => (
+                      <div key={q.key} className="flex items-center justify-between">
+                        <span className="text-sm">{q.label}</span>
+                        <Select value={profile?.profile?.lifestyle?.questionnaire?.[q.key] || ''} onValueChange={(v) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, lifestyle: { ...p?.profile?.lifestyle, questionnaire: { ...p?.profile?.lifestyle?.questionnaire, [q.key]: v } } } }))}>
                           <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="never">Never</SelectItem>
@@ -369,20 +408,20 @@ const ProfilePage = () => {
                     <h4 className="font-semibold">Social Preferences</h4>
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Attend social events</span>
-                      <Switch defaultChecked />
+                      <Switch checked={!!profile?.profile?.lifestyle?.socialPrefs?.events} onCheckedChange={(v) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, lifestyle: { ...p?.profile?.lifestyle, socialPrefs: { ...p?.profile?.lifestyle?.socialPrefs, events: v } } } }))} />
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Study with others</span>
-                      <Switch />
+                      <Switch checked={!!profile?.profile?.lifestyle?.socialPrefs?.studyWithOthers} onCheckedChange={(v) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, lifestyle: { ...p?.profile?.lifestyle, socialPrefs: { ...p?.profile?.lifestyle?.socialPrefs, studyWithOthers: v } } } }))} />
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Share chores equally</span>
-                      <Switch defaultChecked />
+                      <Switch checked={!!profile?.profile?.lifestyle?.socialPrefs?.shareChores} onCheckedChange={(v) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, lifestyle: { ...p?.profile?.lifestyle, socialPrefs: { ...p?.profile?.lifestyle?.socialPrefs, shareChores: v } } } }))} />
                     </div>
                   </div>
                 </div>
                 <div>
-                  <Button className="btn-hero">Save Lifestyle</Button>
+                  <Button className="btn-hero" onClick={() => saveProfile({ profile: { lifestyle: profile?.profile?.lifestyle } })}>Save Lifestyle</Button>
                 </div>
               </CardContent>
             </Card>
@@ -406,19 +445,15 @@ const ProfilePage = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Budget Range</label>
-                    <Input defaultValue="$800 - $1,200 per month" />
+                    <Input value={profile?.profile?.housing?.budgetRange || ''} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, housing: { ...p?.profile?.housing, budgetRange: e.target.value } } }))} />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Preferred Locations</label>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {['Berkeley', 'Oakland', 'Albany'].map((location) => (
-                        <Badge key={location} variant="outline" className="text-xs">{location}</Badge>
-                      ))}
-                    </div>
+                    <Input value={(profile?.profile?.housing?.preferredLocations || []).join(', ')} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, housing: { ...p?.profile?.housing, preferredLocations: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) } } }))} />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Room Type</label>
-                    <Select defaultValue="private">
+                    <Select value={profile?.profile?.housing?.roomType || ''} onValueChange={(v) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, housing: { ...p?.profile?.housing, roomType: v } } }))}>
                       <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="private">Private room in shared apartment</SelectItem>
@@ -429,14 +464,14 @@ const ProfilePage = () => {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Move-in Date</label>
-                    <Input defaultValue="August 2024 (Flexible)" />
+                    <Input value={profile?.profile?.housing?.moveInDate || ''} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, housing: { ...p?.profile?.housing, moveInDate: e.target.value } } }))} />
                   </div>
                 </div>
                 
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Lease Length</label>
-                    <Select defaultValue="9-12">
+                    <Select value={profile?.profile?.housing?.leaseLength || ''} onValueChange={(v) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, housing: { ...p?.profile?.housing, leaseLength: v } } }))}>
                       <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="6">6 months</SelectItem>
@@ -447,20 +482,16 @@ const ProfilePage = () => {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Transportation</label>
-                    <Input defaultValue="Walking distance to campus or BART" />
+                    <Input value={profile?.profile?.housing?.transportation || ''} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, housing: { ...p?.profile?.housing, transportation: e.target.value } } }))} />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Required Amenities</label>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {['WiFi', 'Laundry', 'Kitchen', 'Parking', 'Study Space'].map((amenity) => (
-                        <Badge key={amenity} variant="outline" className="text-xs">{amenity}</Badge>
-                      ))}
-                    </div>
+                    <Input value={(profile?.profile?.housing?.amenities || []).join(', ')} onChange={(e) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, housing: { ...p?.profile?.housing, amenities: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) } } }))} />
                   </div>
                 </div>
               </CardContent>
               <div className="px-6 pb-6">
-                <Button className="btn-hero">Save Housing</Button>
+                <Button className="btn-hero" onClick={() => saveProfile({ profile: { housing: profile?.profile?.housing } })}>Save Housing</Button>
               </div>
             </Card>
           </TabsContent>
@@ -485,7 +516,7 @@ const ProfilePage = () => {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Overall Profile Visibility</span>
-                      <Select defaultValue={profileVisibility}>
+                      <Select value={profile?.profile?.privacy?.visibility || 'matches'} onValueChange={(v) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, privacy: { ...p?.profile?.privacy, visibility: v } } }))}>
                         <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="public">Public</SelectItem>
@@ -495,14 +526,14 @@ const ProfilePage = () => {
                       </Select>
                     </div>
                     {[
-                      'Profile Photo',
-                      'Contact Information',
-                      'Academic Information',
-                      'Lifestyle Details'
+                      { key: 'photo', label: 'Profile Photo' },
+                      { key: 'contact', label: 'Contact Information' },
+                      { key: 'academic', label: 'Academic Information' },
+                      { key: 'lifestyle', label: 'Lifestyle Details' }
                     ].map((row) => (
-                      <div key={row} className="flex items-center justify-between">
-                        <span className="text-sm">{row}</span>
-                        <Select defaultValue="matches">
+                      <div key={row.key} className="flex items-center justify-between">
+                        <span className="text-sm">{row.label}</span>
+                        <Select value={profile?.profile?.privacy?.controls?.[row.key] || 'matches'} onValueChange={(v) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, privacy: { ...p?.profile?.privacy, controls: { ...p?.profile?.privacy?.controls, [row.key]: v } } } }))}>
                           <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="public">Public</SelectItem>
@@ -521,7 +552,7 @@ const ProfilePage = () => {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Two-Factor Authentication</span>
-                      <Switch checked={twoFAEnabled} onCheckedChange={setTwoFAEnabled} />
+                      <Switch checked={!!profile?.profile?.privacy?.security?.twoFactor} onCheckedChange={(v) => setProfile((p: any) => ({ ...p, profile: { ...p?.profile, privacy: { ...p?.profile?.privacy, security: { ...p?.profile?.privacy?.security, twoFactor: v } } } }))} />
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Email Verification</span>
@@ -538,7 +569,7 @@ const ProfilePage = () => {
                   </div>
                 </div>
                 <div>
-                  <Button className="btn-hero">Save Privacy & Security</Button>
+                  <Button className="btn-hero" onClick={() => saveProfile({ profile: { privacy: profile?.profile?.privacy } })}>Save Privacy & Security</Button>
                 </div>
               </CardContent>
             </Card>
@@ -550,7 +581,7 @@ const ProfilePage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   Verification Dashboard
-                  <Badge variant="secondary">{verificationProgress}% Complete</Badge>
+                  <Badge variant="secondary">{typeof profile?.profile?.verification?.progress === 'number' ? profile.profile.verification.progress : verificationProgress}% Complete</Badge>
                 </CardTitle>
                 <CardDescription>Upload and verify your documents</CardDescription>
               </CardHeader>

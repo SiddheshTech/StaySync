@@ -19,7 +19,7 @@ import {
   User,
   HelpCircle
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface StudentLayoutProps {
   children?: ReactNode;
@@ -28,6 +28,8 @@ interface StudentLayoutProps {
 const StudentLayout = ({ children }: StudentLayoutProps) => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [studentName, setStudentName] = useState<string>('');
+  const [studentUniversity, setStudentUniversity] = useState<string>('');
 
   const navigation = [
     { name: 'Dashboard', href: '/student/dashboard', icon: Home },
@@ -42,6 +44,30 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
   const isActive = (href: string) => {
     return location.pathname === href || location.pathname.startsWith(href + '/');
   };
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const baseUrl = (import.meta as any).env?.VITE_API_URL || `${location.protocol}//${location.hostname}:8080`;
+        const token = localStorage.getItem('auth_token');
+        const res = await fetch(`${baseUrl}/student/dashboard`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        setStudentName(data?.student?.name || '');
+        setStudentUniversity(data?.student?.university || '');
+      } catch {}
+    };
+    load();
+  }, []);
+
+  const initials = (studentName || '')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(part => part[0]?.toUpperCase())
+    .join('') || 'ST';
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
@@ -97,11 +123,11 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
             <div className="p-4 border-b">
               <div className="flex items-center gap-3">
                 <Avatar className="w-10 h-10">
-                  <AvatarFallback className="bg-primary/10 text-primary">JD</AvatarFallback>
+                  <AvatarFallback className="bg-primary/10 text-primary">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">John Doe</p>
-                  <p className="text-xs text-muted-foreground">UC Berkeley</p>
+                  <p className="text-sm font-medium truncate">{studentName || 'Student'}</p>
+                  <p className="text-xs text-muted-foreground">{studentUniversity || 'University'}</p>
                 </div>
                 <Badge variant="secondary" className="text-xs">Student</Badge>
               </div>
@@ -139,7 +165,17 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
                   <HelpCircle className="w-4 h-4 mr-2" />
                   Help
                 </Button>
-                <Button variant="ghost" size="sm" className="w-full justify-start text-destructive">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-destructive"
+                  onClick={() => {
+                    try {
+                      localStorage.removeItem('auth_token');
+                    } catch {}
+                    window.location.href = '/login';
+                  }}
+                >
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign Out
                 </Button>
@@ -180,7 +216,7 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
                   <Bell className="w-4 h-4" />
                 </Button>
                 <Avatar className="w-8 h-8">
-                  <AvatarFallback className="bg-primary/10 text-primary">JD</AvatarFallback>
+                  <AvatarFallback className="bg-primary/10 text-primary">{initials}</AvatarFallback>
                 </Avatar>
               </div>
             </div>
