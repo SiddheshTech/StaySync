@@ -118,262 +118,33 @@ const SearchPage = () => {
     return chips;
   }, [searchQuery, selectedTypes, bedroomCount, bathroomCount, selectedAmenities, budgetRange, distanceRange]);
 
-  // Enhanced listings data with comprehensive information
-  const listings = [
-    {
-      id: 1,
-      type: 'apartment',
-      title: 'Modern Studio in Connaught Place',
-      location: 'Connaught Place, Delhi',
-      rent: 25000,
-      bedrooms: 0,
-      bathrooms: 1,
-      sqft: 450,
-      amenities: ['WiFi', 'Laundry', 'Parking', 'Gym', 'Pool', 'Study Room'],
-      rating: 4.8,
-      reviews: 24,
-      distance: 0.5,
-      available: '2024-08-01',
-      landlord: {
-        name: 'Berkeley Properties',
-        rating: 4.6,
-        avatar: 'BP',
-        verified: true,
-        responseTime: '2 hours'
-      },
-      images: 8,
-      featured: true,
-      moveInDate: '2024-08-01',
-      leaseLength: '12 months',
-      deposit: 25000,
-      utilities: 'Included',
-      petFriendly: false,
-      smokingAllowed: false,
-      furnished: true,
-      airConditioning: true,
-      heating: true,
-      dishwasher: true,
-      washerDryer: true,
-      balcony: false,
-      parking: 'Covered',
-      security: '24/7',
-      nearbyTransit: ['BART', 'AC Transit'],
-      walkScore: 85,
-      bikeScore: 92,
-      transitScore: 78,
-      description: 'Beautiful modern studio with premium amenities in the heart of downtown Berkeley. Perfect for students who want to be close to campus and city life.',
-      highlights: ['Prime Location', 'Modern Amenities', 'Student-Friendly'],
-      virtualTour: true,
-      videoTour: true,
-      lastUpdated: '2024-01-15',
-      views: 1247,
-      saves: 89,
-      applications: 12
-    },
-    {
-      id: 2,
-      type: 'roommate',
-      title: 'Looking for Female Roommate - 2BR Apartment',
-      location: 'Koramangala, Bangalore',
-      rent: 18000,
-      bedrooms: 1,
-      bathrooms: 1,
-      roommate: {
-        name: 'Emma Johnson',
-        major: 'Computer Science',
-        year: 'Junior',
-        avatar: 'EJ',
-        age: 20,
-        interests: ['Coding', 'Hiking', 'Photography'],
-        lifestyle: 'Quiet, studious',
-        socialLevel: 'Medium',
-        cleanliness: 'Very Clean'
-      },
-      amenities: ['WiFi', 'Kitchen', 'Study Room', 'Garden', 'Parking'],
-      rating: 4.9,
-      compatibility: 95,
-      distance: 1.2,
-      available: '2024-08-15',
-      images: 6,
-      moveInDate: '2024-08-15',
-      leaseLength: 'Flexible',
-      deposit: 18000,
-      utilities: 'Split',
-      petFriendly: true,
-      smokingAllowed: false,
-      furnished: false,
-      airConditioning: false,
-      heating: true,
-      dishwasher: true,
-      washerDryer: true,
-      balcony: true,
-      parking: 'Street',
-      security: 'Building',
-      nearbyTransit: ['AC Transit'],
-      walkScore: 72,
-      bikeScore: 85,
-      transitScore: 65,
-      description: 'Looking for a responsible female roommate to share a beautiful 2BR apartment. Great location with easy access to campus and local amenities.',
-      highlights: ['Female Only', 'Pet Friendly', 'Flexible Lease'],
-      virtualTour: false,
-      videoTour: true,
-      lastUpdated: '2024-01-14',
-      views: 892,
-      saves: 67,
-      applications: 8
-    },
-    {
-      id: 3,
-      type: 'apartment',
-      title: 'Cozy 1BR Near Campus',
-      location: 'Powai, Mumbai',
-      rent: 30000,
-      bedrooms: 1,
-      bathrooms: 1,
-      sqft: 600,
-      amenities: ['WiFi', 'Gym', 'Pool', 'Laundry', 'Parking'],
-      rating: 4.5,
-      reviews: 18,
-      distance: 0.8,
-      available: '2024-09-01',
-      landlord: {
-        name: 'Campus Living LLC',
-        rating: 4.3,
-        avatar: 'CL',
-        verified: true,
-        responseTime: '4 hours'
-      },
-      images: 5,
-      moveInDate: '2024-09-01',
-      leaseLength: '12 months',
-      deposit: 30000,
-      utilities: 'Not Included',
-      petFriendly: true,
-      smokingAllowed: false,
-      furnished: false,
-      airConditioning: true,
-      heating: true,
-      dishwasher: true,
-      washerDryer: true,
-      balcony: true,
-      parking: 'Assigned',
-      security: 'Building',
-      nearbyTransit: ['BART', 'AC Transit'],
-      walkScore: 78,
-      bikeScore: 88,
-      transitScore: 82,
-      description: 'Charming 1BR apartment just steps from campus. Perfect for graduate students who want convenience and comfort.',
-      highlights: ['Campus Proximity', 'Pet Friendly', 'Modern Building'],
-      virtualTour: true,
-      videoTour: false,
-      lastUpdated: '2024-01-13',
-      views: 1563,
-      saves: 134,
-      applications: 19
-    },
-    {
-      id: 4,
-      type: 'roommate',
-      title: 'Grad Student Seeking Quiet Roommate',
-      location: 'Indiranagar, Bangalore',
-      rent: 15000,
-      bedrooms: 1,
-      bathrooms: 1,
-      roommate: {
-        name: 'Alex Chen',
-        major: 'Physics PhD',
-        year: 'Graduate',
-        avatar: 'AC',
-        age: 26,
-        interests: ['Research', 'Reading', 'Coffee'],
-        lifestyle: 'Very quiet, focused on studies',
-        socialLevel: 'Low',
-        cleanliness: 'Extremely Clean'
-      },
-      amenities: ['WiFi', 'Parking', 'Quiet', 'Study Space', 'Kitchen'],
-      rating: 4.7,
-      compatibility: 88,
-      distance: 2.1,
-      available: '2024-08-01',
-      images: 4,
-      moveInDate: '2024-08-01',
-      leaseLength: '12 months',
-      deposit: 15000,
-      utilities: 'Split',
-      petFriendly: false,
-      smokingAllowed: false,
-      furnished: true,
-      airConditioning: false,
-      heating: true,
-      dishwasher: true,
-      washerDryer: true,
-      balcony: false,
-      parking: 'Garage',
-      security: 'Building',
-      nearbyTransit: ['AC Transit', 'BART'],
-      walkScore: 65,
-      bikeScore: 78,
-      transitScore: 72,
-      description: 'Quiet, studious environment perfect for graduate students. Looking for someone who values peace and academic focus.',
-      highlights: ['Quiet Environment', 'Grad Student', 'Furnished'],
-      virtualTour: false,
-      videoTour: false,
-      lastUpdated: '2024-01-12',
-      views: 634,
-      saves: 45,
-      applications: 6
-    },
-    {
-      id: 5,
-      type: 'apartment',
-      title: 'Luxury 2BR with City Views',
-      location: 'Bandra West, Mumbai',
-      rent: 56000,
-      bedrooms: 2,
-      bathrooms: 2,
-      sqft: 1200,
-      amenities: ['WiFi', 'Gym', 'Pool', 'Laundry', 'Parking', 'Balcony', 'Dishwasher'],
-      rating: 4.9,
-      reviews: 31,
-      distance: 3.5,
-      available: '2024-07-15',
-      landlord: {
-        name: 'Hillside Properties',
-        rating: 4.8,
-        avatar: 'HP',
-        verified: true,
-        responseTime: '1 hour'
-      },
-      images: 12,
-      featured: true,
-      moveInDate: '2024-07-15',
-      leaseLength: '12 months',
-      deposit: 56000,
-      utilities: 'Not Included',
-      petFriendly: true,
-      smokingAllowed: false,
-      furnished: false,
-      airConditioning: true,
-      heating: true,
-      dishwasher: true,
-      washerDryer: true,
-      balcony: true,
-      parking: 'Garage',
-      security: '24/7',
-      nearbyTransit: ['AC Transit'],
-      walkScore: 45,
-      bikeScore: 65,
-      transitScore: 55,
-      description: 'Stunning 2BR apartment with panoramic bay views. Perfect for students who want luxury and space.',
-      highlights: ['Bay Views', 'Luxury Amenities', 'Spacious'],
-      virtualTour: true,
-      videoTour: true,
-      lastUpdated: '2024-01-11',
-      views: 2341,
-      saves: 198,
-      applications: 25
-    }
-  ];
+  // Backend-powered listings
+  const [listings, setListings] = useState<any[]>([]);
+  useEffect(() => {
+    const load = async () => {
+      setIsLoading(true);
+      try {
+        const baseUrl = (import.meta as any).env?.VITE_API_URL || `${location.protocol}//${location.hostname}:8080`;
+        const params = new URLSearchParams();
+        if (searchQuery) params.set('q', searchQuery);
+        if (!(selectedTypes.length === 2)) params.set('type', selectedTypes[0]);
+        if (bedroomCount !== null) params.set('beds', String(bedroomCount));
+        if (bathroomCount !== null) params.set('baths', String(bathroomCount));
+        if (distanceRange[1] !== 5) params.set('dist', String(distanceRange[1]));
+        if (selectedAmenities.length) params.set('amen', selectedAmenities.join(','));
+        params.set('min', String(budgetRange[0]));
+        params.set('max', String(budgetRange[1]));
+        params.set('page', String(page));
+        params.set('pageSize', String(pageSize));
+        const res = await fetch(`${baseUrl}/student/search?${params.toString()}`);
+        if (!res.ok) throw new Error('Failed to load listings');
+        const data = await res.json();
+        setListings(data.items || []);
+      } catch {}
+      setIsLoading(false);
+    };
+    load();
+  }, [searchQuery, selectedTypes, bedroomCount, bathroomCount, distanceRange, selectedAmenities, budgetRange, page]);
 
   // Comprehensive utility functions
   const getAmenityIcon = (amenity: string) => {

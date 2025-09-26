@@ -79,4 +79,45 @@ const studentSchema = new mongoose.Schema(
 
 export const Student = mongoose.model('Student', studentSchema);
 
+// Listing schema for search/browse
+const listingSchema = new mongoose.Schema(
+  {
+    type: { type: String, enum: ['apartment', 'roommate'], required: true },
+    title: { type: String, required: true },
+    location: { type: String, required: true, index: true },
+    rent: { type: Number, required: true, index: true },
+    bedrooms: { type: Number, default: 0 },
+    bathrooms: { type: Number, default: 1 },
+    sqft: { type: Number },
+    amenities: { type: [String], default: [] },
+    rating: { type: Number, default: 0 },
+    reviews: { type: Number, default: 0 },
+    distance: { type: Number, default: 0 },
+    available: { type: String },
+    featured: { type: Boolean, default: false },
+    compatibility: { type: Number },
+    roommate: {
+      name: String,
+      major: String,
+      year: String,
+      avatar: String
+    },
+    landlord: {
+      name: String,
+      rating: Number,
+      avatar: String
+    },
+    images: { type: Number, default: 0 },
+    lastUpdated: { type: String },
+    views: { type: Number, default: 0 },
+    saves: { type: Number, default: 0 },
+    applications: { type: Number, default: 0 }
+  },
+  { timestamps: true }
+);
+
+listingSchema.index({ title: 'text', location: 'text' });
+
+export const Listing = mongoose.model('Listing', listingSchema);
+
 

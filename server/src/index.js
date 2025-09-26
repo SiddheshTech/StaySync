@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import { connectToDatabase } from './db.js';
 import authRouter from './auth.js';
-import { Student } from './db.js';
+import { Student, Listing } from './db.js';
 
 const app = express();
 
@@ -52,6 +52,61 @@ app.get('/student/dashboard', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to load dashboard' });
+  }
+});
+
+// Listings search/browse
+app.get('/student/search', async (req, res) => {
+  try {
+    const {
+      q,
+      type,
+      min,
+      max,
+      beds,
+      baths,
+      dist,
+      amen
+    } = req.query;
+
+    const filter = {};
+    if (q) {
+      filter.$text = { $search: String(q) };
+    }
+    if (type && (type === 'apartment' || type === 'roommate')) {
+      filter.type = type;
+    }
+    if (min || max) {
+      filter.rent = {};
+      if (min) filter.rent.$gte = Number(min);
+      if (max) filter.rent.$lte = Number(max);
+    }
+    if (beds) filter.bedrooms = Number(beds);
+    if (baths) filter.bathrooms = Number(baths);
+    if (dist) filter.distance = { $lte: Number(dist) };
+    if (amen) filter.amenities = { $all: String(amen).split(',').filter(Boolean) };
+
+    const sortMap = {
+      'price-low': { rent: 1 },
+      'price-high': { rent: -1 },
+      rating: { rating: -1 },
+      newest: { updatedAt: -1 },
+      distance: { distance: 1 }
+    };
+    const sort = sortMap[String(req.query.sort || 'relevance')] || { featured: -1, rating: -1 };
+
+    const page = Math.max(1, Number(req.query.page || 1));
+    const pageSize = Math.min(25, Math.max(1, Number(req.query.pageSize || 10)));
+
+    const [items, total] = await Promise.all([
+      Listing.find(filter).sort(sort).skip((page - 1) * pageSize).limit(pageSize).lean(),
+      Listing.countDocuments(filter)
+    ]);
+
+    res.json({ items, total, page, pageSize });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to search listings' });
   }
 });
 
