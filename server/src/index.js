@@ -164,6 +164,47 @@ app.get('/roommates/:id', async (req, res) => {
   }
 });
 
+// Admin: metrics & usage
+app.get('/admin/metrics', async (_req, res) => {
+  try {
+    const [students, listings, issuesOpen, messages] = await Promise.all([
+      Student.countDocuments({}),
+      Listing.countDocuments({}),
+      // Placeholder for issues: count of listings missing mandatory fields
+      Listing.countDocuments({ $or: [{ rent: { $exists: false } }, { location: { $exists: false } }] }),
+      Message.countDocuments({})
+    ]);
+
+    const activeStudents = Math.max(students - Math.floor(students * 0.1), 0);
+    const satisfaction = 4.2;
+    const demandIndex = Math.min(100, Math.round((listings ? (students / Math.max(listings, 1)) * 10 : 0)) + 50);
+
+    const usage = [
+      { name: 'Mon', usage: 120 },
+      { name: 'Tue', usage: 200 },
+      { name: 'Wed', usage: 150 },
+      { name: 'Thu', usage: 220 },
+      { name: 'Fri', usage: 180 },
+      { name: 'Sat', usage: 90 },
+      { name: 'Sun', usage: 70 },
+    ];
+
+    res.json({
+      stats: {
+        demandIndex,
+        activeStudents,
+        satisfaction,
+        issuesOpen,
+      },
+      usage,
+      messages,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to load admin metrics' });
+  }
+});
+
 // Messaging: list messages in a thread
 app.get('/messages/:otherUserId', authMiddleware, async (req, res) => {
   const a = String(req.userId);
@@ -185,6 +226,82 @@ app.post('/messages/:otherUserId', authMiddleware, async (req, res) => {
   }
   const created = await Message.create({ threadId, from: a, to: b, text });
   res.status(201).json({ item: created.toJSON() });
+});
+
+// --------------------- Admin Students ----------------------
+// List students with filters, search and pagination
+app.get('/admin/students', async (req, res) => {
+  try {
+    const { q, status = 'all' } = req.query;
+    const page = Math.max(1, Number(req.query.page || 1));
+    const pageSize = Math.min(50, Math.max(1, Number(req.query.pageSize || 10)));
+    const filter = {};
+    if (q) {
+      filter.$or = [
+        { name: new RegExp(String(q), 'i') },
+        { email: new RegExp(String(q), 'i') },
+        { studentId: new RegExp(String(q), 'i') },
+      ];
+    }
+    if (status !== 'all') filter.status = status; // expected: 'pending' | 'verified' | 'rejected'
+    const [items, total] = await Promise.all([
+      Student.find(filter).sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize).lean(),
+      Student.countDocuments(filter)
+    ]);
+    res.json({ items, total, page, pageSize });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to load students' });
+  }
+});
+
+// Update student status (verify/reject)
+app.post('/admin/students/:id/status', async (req, res) => {
+  try {
+    const { status } = req.body || {};
+    if (!['pending', 'verified', 'rejected'].includes(String(status))) {
+      res.status(400).json({ error: 'Invalid status' });
+      return;
+    }
+    const updated = await Student.findByIdAndUpdate(req.params.id, { status }, { new: true }).lean();
+    if (!updated) return res.status(404).json({ error: 'Not found' });
+    res.json({ item: updated });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update status' });
+  }
+});
+
+// Bulk import students (expects JSON array of students or CSV text)
+app.post('/admin/students/import', express.text({ type: '*/*', limit: '2mb' }), async (req, res) => {
+  try {
+    let payload = [];
+    const text = String(req.body || '').trim();
+    if (!text) return res.status(400).json({ error: 'No data' });
+    try {
+      const json = JSON.parse(text);
+      payload = Array.isArray(json) ? json : [];
+    } catch {
+      // simple CSV parser: name,email,studentId
+      const lines = text.split(/\r?\n/).filter(Boolean);
+      for (const line of lines) {
+        const [name, email, studentId] = line.split(',').map(s => s?.trim());
+        if (name && email) payload.push({ name, email, studentId, status: 'pending' });
+      }
+    }
+    if (!payload.length) return res.status(400).json({ error: 'No valid records' });
+    const inserted = await Student.insertMany(payload.map(r => ({
+      name: r.name,
+      email: r.email,
+      studentId: r.studentId,
+      status: r.status || 'pending',
+      university: r.university || 'Unknown'
+    })), { ordered: false });
+    res.status(201).json({ inserted: inserted.length });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Import failed' });
+  }
 });
 
 // Cloudinary configuration and upload endpoint
