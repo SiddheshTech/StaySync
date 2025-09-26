@@ -199,59 +199,7 @@ const DashboardPage = () => {
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
-          {/* Sidebar */}
-          <aside className="space-y-4 sticky top-6 self-start">
-            <Card className="card-hover">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Navigation</CardTitle>
-                <CardDescription>Quick access</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-1">
-                <Link to="/dashboard" className={`flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors ${location.pathname === '/dashboard' ? 'bg-muted/60 font-medium' : ''}`}>
-                  <Home className="w-4 h-4" /> Dashboard
-                </Link>
-                <Link to="/search" className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors">
-                  <Search className="w-4 h-4" /> Browse Listings
-                </Link>
-                <Link to="/student/community" className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors">
-                  <Users className="w-4 h-4" /> Community
-                </Link>
-                <Link to="/create-listing" className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors">
-                  <Plus className="w-4 h-4" /> Create New Listing
-                </Link>
-                <Link to="/messages" className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors">
-                  <MessageSquare className="w-4 h-4" /> Messages
-                  <Badge variant="secondary" className="ml-auto">5</Badge>
-                </Link>
-                <Link to="/applications" className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors">
-                  <FileText className="w-4 h-4" /> Applications
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Account</CardTitle>
-                <CardDescription>Manage your profile</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-1">
-                <Link to="/profile" className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors">
-                  <Settings className="w-4 h-4" /> Profile
-                </Link>
-                <Link to="/billing" className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors">
-                  <CreditCard className="w-4 h-4" /> Billing
-                </Link>
-                <Link to="/help" className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors">
-                  <HelpCircle className="w-4 h-4" /> Help & Support
-                </Link>
-                <button className="w-full flex items-center gap-1 px-3 py-2 rounded-md hover:bg-destructive/10 text-destructive transition-colors">
-                  <LogOut className="w-4 h-4" /> Log out
-                </button>
-              </CardContent>
-            </Card>
-          </aside>
-
+        <div>
           {/* Main Panel */}
           <section>
             {/* Header */}

@@ -101,6 +101,19 @@ const SearchPage = () => {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [searchAlerts, setSearchAlerts] = useState<any[]>([]);
   const [showSearchAnalytics, setShowSearchAnalytics] = useState(false);
+  
+  // Derived: active filters summary
+  const activeFilterChips = useMemo(() => {
+    const chips: { key: string; label: string; onClear: () => void }[] = [];
+    if (searchQuery) chips.push({ key: 'q', label: `"${searchQuery}"`, onClear: () => setSearchQuery('') });
+    if (selectedTypes.length && selectedTypes.length < 2) chips.push({ key: 'type', label: selectedTypes[0] === 'apartment' ? 'Apartments' : 'Roommates', onClear: () => setSelectedTypes(['apartment','roommate']) });
+    if (bedroomCount !== null) chips.push({ key: 'bed', label: `${bedroomCount === 0 ? 'Studio' : bedroomCount} bed`, onClear: () => setBedroomCount(null) });
+    if (bathroomCount !== null) chips.push({ key: 'bath', label: `${bathroomCount} bath`, onClear: () => setBathroomCount(null) });
+    if (selectedAmenities.length) chips.push({ key: 'amen', label: `${selectedAmenities.length} amenities`, onClear: () => setSelectedAmenities([]) });
+    if (budgetRange[0] !== 15000 || budgetRange[1] !== 60000) chips.push({ key: 'budget', label: `₹${budgetRange[0].toLocaleString()}–₹${budgetRange[1].toLocaleString()}`, onClear: () => setBudgetRange([15000,60000]) });
+    if (distanceRange[0] !== 0 || distanceRange[1] !== 5) chips.push({ key: 'dist', label: `≤ ${distanceRange[1]} km`, onClear: () => setDistanceRange([0,5]) });
+    return chips;
+  }, [searchQuery, selectedTypes, bedroomCount, bathroomCount, selectedAmenities, budgetRange, distanceRange]);
 
   // Enhanced listings data with comprehensive information
   const listings = [
@@ -599,9 +612,9 @@ const SearchPage = () => {
                 >
                   <Filter className="w-4 h-4 mr-2" />
                   Filters
-                  {selectedAmenities.length > 0 && (
+                  {(activeFilterChips.length > 0) && (
                     <Badge variant="secondary" className="ml-2">
-                      {selectedAmenities.length}
+                      {activeFilterChips.length}
                     </Badge>
                   )}
                 </Button>
@@ -617,6 +630,21 @@ const SearchPage = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Active filters chips */}
+        {activeFilterChips.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            {activeFilterChips.map(chip => (
+              <Badge key={chip.key} variant="outline" className="flex items-center gap-1">
+                {chip.label}
+                <Button size="icon" variant="ghost" className="h-5 w-5" onClick={chip.onClear}>
+                  <X className="w-3 h-3" />
+                </Button>
+              </Badge>
+            ))}
+            <Button variant="ghost" size="sm" onClick={clearFilters}>Reset all</Button>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Filters Sidebar */}
@@ -641,7 +669,7 @@ const SearchPage = () => {
                 {/* Listing Type */}
                 <div className="space-y-2">
                   <Label>Listing Type</Label>
-                  <Select defaultValue="all">
+                  <Select defaultValue="all" onValueChange={(v) => setSelectedTypes(v === 'all' ? ['apartment','roommate'] : [v])}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -681,7 +709,8 @@ const SearchPage = () => {
                         key={beds}
                         variant="outline"
                         size="sm"
-                        className="p-2 h-8"
+                        className={`p-2 h-8 ${bedroomCount === (beds === '4+' ? 4 : (beds as number)) ? 'bg-primary/10 border-primary' : ''}`}
+                        onClick={() => setBedroomCount(beds === '4+' ? 4 : (beds as number))}
                       >
                         {beds === 0 ? 'Studio' : beds}
                       </Button>
@@ -693,19 +722,24 @@ const SearchPage = () => {
                 <div className="space-y-2">
                   <Label>Amenities</Label>
                   <div className="space-y-2">
-                    {['WiFi', 'Parking', 'Laundry', 'Gym', 'Pool', 'Study Room'].map((amenity) => (
-                      <div key={amenity} className="flex items-center space-x-2">
-                        <Checkbox id={amenity} />
-                        <Label htmlFor={amenity} className="text-sm">{amenity}</Label>
-                      </div>
-                    ))}
+                    {['WiFi', 'Parking', 'Laundry', 'Gym', 'Pool', 'Study Room'].map((amenity) => {
+                      const checked = selectedAmenities.includes(amenity);
+                      return (
+                        <div key={amenity} className="flex items-center space-x-2">
+                          <Checkbox id={amenity} checked={checked} onCheckedChange={(v) => {
+                            setSelectedAmenities(prev => v ? [...prev, amenity] : prev.filter(a => a !== amenity));
+                          }} />
+                          <Label htmlFor={amenity} className="text-sm">{amenity}</Label>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
                 {/* Distance */}
                 <div className="space-y-2">
                   <Label>Distance from Campus</Label>
-                  <Select defaultValue="any">
+                  <Select defaultValue="any" onValueChange={(v) => setDistanceRange([0, v === 'any' ? 5 : Number(v)])}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -718,9 +752,26 @@ const SearchPage = () => {
                   </Select>
                 </div>
 
-                <Button className="w-full btn-hero">
-                  Apply Filters
-                </Button>
+                <div className="flex gap-2">
+                  <Button className="w-full btn-hero" onClick={() => setShowFilters(false)}>Apply Filters</Button>
+                  <Button variant="outline" className="w-full" onClick={clearFilters}>Reset</Button>
+                </div>
+                
+                {/* Quick budget presets */}
+                <div className="pt-2">
+                  <Label className="text-xs text-muted-foreground">Quick budget</Label>
+                  <div className="mt-2 grid grid-cols-3 gap-2">
+                    {[
+                      [15000,25000],
+                      [25000,40000],
+                      [40000,60000],
+                    ].map((range) => (
+                      <Button key={range.join('-')} size="sm" variant="outline" onClick={() => setBudgetRange(range as [number,number])}>
+                        ₹{range[0].toLocaleString()}–₹{range[1].toLocaleString()}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>

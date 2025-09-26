@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,10 +13,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
+// Separator is already imported later in file; keep single import only
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
 import BrandBar from '@/components/BrandBar';
 import { 
   DollarSign,
@@ -262,6 +263,30 @@ const CreateListingPage = () => {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [isDraft, setIsDraft] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+
+  const formatINR = (value: string | number) => {
+    const num = typeof value === 'string' ? Number(value) : value;
+    if (Number.isNaN(num)) return '₹0';
+    return `₹${Math.round(num).toLocaleString('en-IN')}`;
+  };
+
+  const completeness = useMemo(() => {
+    const required = [
+      !!formData.title,
+      !!formData.description,
+      !!formData.propertyType,
+      !!formData.address,
+      !!formData.city,
+      !!formData.state,
+      !!formData.zipCode,
+      !!formData.monthlyRent,
+      formData.bedrooms > 0 || formData.bedrooms === 0,
+      formData.bathrooms > 0 || formData.bathrooms === 0,
+    ];
+    const pct = Math.round((required.filter(Boolean).length / required.length) * 100);
+    return pct;
+  }, [formData]);
 
   const steps = [
     { id: 1, title: 'Basic Information', description: 'Property title and type' },
@@ -324,10 +349,34 @@ const CreateListingPage = () => {
     setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
   };
 
-  const nextStep = () => {
-    if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
+  const validateStep = (step: number): string[] => {
+    const errors: string[] = [];
+    if (step === 1) {
+      if (!formData.title) errors.push('Please provide a property title.');
+      if (!formData.description) errors.push('Please add a brief description.');
+      if (!formData.propertyType) errors.push('Select a property type.');
     }
+    if (step === 2) {
+      if (!formData.address) errors.push('Street address is required.');
+      if (!formData.city) errors.push('City is required.');
+      if (!formData.state) errors.push('State is required.');
+      if (!formData.zipCode) errors.push('ZIP/Pin code is required.');
+    }
+    if (step === 3) {
+      if (formData.bedrooms === undefined) errors.push('Enter bedrooms.');
+      if (formData.bathrooms === undefined) errors.push('Enter bathrooms.');
+    }
+    if (step === 4) {
+      if (!formData.monthlyRent) errors.push('Monthly rent is required.');
+    }
+    return errors;
+  };
+
+  const nextStep = () => {
+    const errs = validateStep(currentStep);
+    setValidationErrors(errs);
+    if (errs.length > 0) return;
+    if (currentStep < steps.length) setCurrentStep(currentStep + 1);
   };
 
   const prevStep = () => {
@@ -343,9 +392,12 @@ const CreateListingPage = () => {
   };
 
   const handleSubmit = () => {
+    const errs = validateStep(currentStep);
+    setValidationErrors(errs);
+    if (errs.length > 0) return;
     // In real app, submit to API
     console.log('Listing created:', formData);
-    navigate('/navigation');
+    navigate('/search?published=1');
   };
 
   const progress = (currentStep / steps.length) * 100;
@@ -357,7 +409,7 @@ const CreateListingPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <Button variant="outline" size="sm" onClick={() => navigate('/navigation')}>
+          <Button variant="outline" size="sm" onClick={() => navigate('/search')}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Listings
           </Button>
@@ -383,13 +435,22 @@ const CreateListingPage = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Step {currentStep} of {steps.length}</span>
-                <span className="text-sm text-muted-foreground">{Math.round(progress)}% Complete</span>
+                <span className="text-sm text-muted-foreground">{Math.round(progress)}% Complete • Form completeness: {completeness}%</span>
               </div>
               <Progress value={progress} className="h-2" />
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">{steps[currentStep - 1].title}</h3>
                 <p className="text-sm text-muted-foreground">{steps[currentStep - 1].description}</p>
               </div>
+              {validationErrors.length > 0 && (
+                <Alert>
+                  <AlertDescription>
+                    <ul className="list-disc pl-5 space-y-1">
+                      {validationErrors.map((e, i) => (<li key={i}>{e}</li>))}
+                    </ul>
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -432,7 +493,7 @@ const CreateListingPage = () => {
           </Card>
 
           {/* Main Form */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 space-y-6">
             <Card>
               <CardContent className="p-6">
                 {/* Step 1: Basic Information */}
@@ -442,7 +503,7 @@ const CreateListingPage = () => {
                       <h3 className="text-xl font-semibold mb-4">Basic Information</h3>
                       <div className="space-y-4">
                         <div>
-                          <Label htmlFor="title">Property Title *</Label>
+                            <Label htmlFor="title">Property Title *</Label>
                           <Input
                             id="title"
                             value={formData.title}
@@ -453,7 +514,7 @@ const CreateListingPage = () => {
                         </div>
                         
                         <div>
-                          <Label htmlFor="description">Description *</Label>
+                            <Label htmlFor="description">Description *</Label>
                           <Textarea
                             id="description"
                             value={formData.description}
@@ -462,6 +523,7 @@ const CreateListingPage = () => {
                             rows={4}
                             className="mt-1"
                           />
+                            <p className="text-xs text-muted-foreground mt-1">Tip: Mention proximity to metro, universities, and key amenities.</p>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -653,7 +715,7 @@ const CreateListingPage = () => {
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <Label htmlFor="monthlyRent">Monthly Rent *</Label>
+                            <Label htmlFor="monthlyRent">Monthly Rent (INR) *</Label>
                             <div className="relative mt-1">
                               <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                               <Input
@@ -661,13 +723,14 @@ const CreateListingPage = () => {
                                 type="number"
                                 value={formData.monthlyRent}
                                 onChange={(e) => handleInputChange('monthlyRent', e.target.value)}
-                                placeholder="1200"
+                                placeholder="25000"
                                 className="pl-10"
                               />
+                              <p className="text-xs text-muted-foreground mt-1">Shown to seekers as {formatINR(formData.monthlyRent || 0)} / month</p>
                             </div>
                           </div>
                           <div>
-                            <Label htmlFor="securityDeposit">Security Deposit</Label>
+                            <Label htmlFor="securityDeposit">Security Deposit (INR)</Label>
                             <div className="relative mt-1">
                               <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                               <Input
@@ -675,16 +738,17 @@ const CreateListingPage = () => {
                                 type="number"
                                 value={formData.securityDeposit}
                                 onChange={(e) => handleInputChange('securityDeposit', e.target.value)}
-                                placeholder="1200"
+                                placeholder="25000"
                                 className="pl-10"
                               />
+                              <p className="text-xs text-muted-foreground mt-1">Common: 1 month of rent → {formatINR(Number(formData.monthlyRent || 0))}</p>
                             </div>
                           </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <Label htmlFor="applicationFee">Application Fee</Label>
+                            <Label htmlFor="applicationFee">Application Fee (Optional)</Label>
                             <div className="relative mt-1">
                               <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                               <Input
@@ -698,7 +762,7 @@ const CreateListingPage = () => {
                             </div>
                           </div>
                           <div>
-                            <Label htmlFor="petDeposit">Pet Deposit</Label>
+                            <Label htmlFor="petDeposit">Pet Deposit (Optional)</Label>
                             <div className="relative mt-1">
                               <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                               <Input
@@ -972,7 +1036,7 @@ const CreateListingPage = () => {
                           <CardContent>
                             <div className="space-y-4">
                               <div className="flex items-center gap-4">
-                                <div className="text-2xl font-bold text-primary">${formData.monthlyRent}/month</div>
+                                <div className="text-2xl font-bold text-primary">{formatINR(formData.monthlyRent || 0)}/month</div>
                                 <Badge variant="outline">{formData.bedrooms} bed • {formData.bathrooms} bath</Badge>
                               </div>
                               
@@ -1027,6 +1091,68 @@ const CreateListingPage = () => {
                 </div>
               </CardContent>
             </Card>
+
+          {/* Live Summary & Tips */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Live Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Title</span>
+                  <span className="font-medium truncate max-w-[60%] text-right">{formData.title || '—'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Address</span>
+                  <span className="font-medium truncate max-w-[60%] text-right">{[formData.address, formData.city, formData.state].filter(Boolean).join(', ') || '—'}</span>
+                </div>
+                <Separator />
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div>
+                    <div className="text-lg font-semibold">{formData.bedrooms || 0}</div>
+                    <div className="text-xs text-muted-foreground">Bedrooms</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-semibold">{formData.bathrooms || 0}</div>
+                    <div className="text-xs text-muted-foreground">Bathrooms</div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-semibold">{formData.squareFeet || '—'}</div>
+                    <div className="text-xs text-muted-foreground">Sq Ft</div>
+                  </div>
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Monthly</span>
+                  <span className="font-semibold text-primary">{formatINR(formData.monthlyRent || 0)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Deposit</span>
+                  <span className="font-semibold">{formatINR(formData.securityDeposit || (formData.monthlyRent || 0))}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Utilities</span>
+                  <span className="font-medium">{formData.utilities || '—'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Amenities</span>
+                  <span className="font-medium">{formData.amenities.length}</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Helpful Tips</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm text-muted-foreground">
+                <div className="border rounded-md p-3">Good photos drive 3× more inquiries. Upload at least 5 clear, well‑lit images.</div>
+                <div className="border rounded-md p-3">Mention closest metro/bus stop and distance in minutes.</div>
+                <div className="border rounded-md p-3">Be transparent about policies (guests, pets, quiet hours).</div>
+              </CardContent>
+            </Card>
+          </div>
           </div>
         </div>
 
@@ -1049,7 +1175,7 @@ const CreateListingPage = () => {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex items-center gap-4">
-                      <div className="text-3xl font-bold text-primary">${formData.monthlyRent}/month</div>
+                      <div className="text-3xl font-bold text-primary">{formatINR(formData.monthlyRent || 0)}/month</div>
                       <div className="flex items-center gap-2">
                         <Badge variant="outline">{formData.bedrooms} bed</Badge>
                         <Badge variant="outline">{formData.bathrooms} bath</Badge>

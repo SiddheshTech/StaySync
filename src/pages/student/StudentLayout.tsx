@@ -31,6 +31,8 @@ const StudentLayout = ({ children }: StudentLayoutProps) => {
 
   const navigation = [
     { name: 'Dashboard', href: '/student/dashboard', icon: Home },
+    { name: 'Browse Listings', href: '/student/search', icon: Search },
+    { name: 'Flatmates', href: '/student/flatmates', icon: Users },
     { name: 'Community', href: '/student/community', icon: Users },
     { name: 'Messages', href: '/student/messages', icon: MessageSquare },
     { name: 'Applications', href: '/student/applications', icon: FileText },

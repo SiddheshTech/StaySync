@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout";
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
@@ -31,6 +31,7 @@ import AdminSupportPage from "./pages/admin/AdminSupportPage";
 import StudentLayout from "./pages/student/StudentLayout";
 import StudentDashboardPage from "./pages/student/DashboardPage";
 import StudentCommunityPage from "./pages/student/CommunityPage";
+import StudentFlatmatesPage from "./pages/student/FlatmatesPage";
 import StudentProfilePage from "./pages/student/ProfilePage";
 import StudentEditProfilePage from "./pages/student/EditProfilePage";
 import StudentMessagesPage from "./pages/student/MessagesPage";
@@ -54,7 +55,7 @@ const App = () => (
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/dashboard" element={<Navigate to="/student/dashboard" replace />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/profile/edit/:section" element={<EditProfilePage />} />
             <Route path="/messages" element={<MessagesPage />} />
@@ -64,8 +65,10 @@ const App = () => (
             <Route path="/create-listing" element={<CreateListingPage />} />
             <Route path="/student" element={<StudentLayout />}>
               <Route index element={<StudentDashboardPage />} />
-              <Route path="dashboard" element={<StudentDashboardPage />} />
+              <Route path="dashboard" element={<DashboardPage />} />
               <Route path="community" element={<StudentCommunityPage />} />
+              <Route path="search" element={<SearchPage />} />
+              <Route path="flatmates" element={<StudentFlatmatesPage />} />
               <Route path="profile" element={<StudentProfilePage />} />
               <Route path="profile/edit/:section" element={<StudentEditProfilePage />} />
               <Route path="messages" element={<StudentMessagesPage />} />
