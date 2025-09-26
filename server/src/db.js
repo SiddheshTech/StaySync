@@ -158,3 +158,40 @@ const messageSchema = new mongoose.Schema(
 export const Message = mongoose.model('Message', messageSchema);
 
 
+// Admin: Community Group
+const groupSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, unique: true, trim: true },
+    members: { type: Number, default: 0 }
+  },
+  { timestamps: true }
+);
+
+export const Group = mongoose.model('Group', groupSchema);
+
+// Admin: Academic Calendar Event
+const calendarEventSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    start: { type: Date, required: true },
+    end: { type: Date, required: true },
+    term: { type: String, default: 'Spring' },
+    year: { type: Number, default: new Date().getFullYear() }
+  },
+  { timestamps: true }
+);
+
+export const CalendarEvent = mongoose.model('CalendarEvent', calendarEventSchema);
+
+// Admin: Emergency Broadcast log
+const alertSchema = new mongoose.Schema(
+  {
+    message: { type: String, required: true },
+    via: { type: [String], default: ['email'] },
+    status: { type: String, enum: ['queued','sent','failed'], default: 'queued' }
+  },
+  { timestamps: true }
+);
+
+export const Alert = mongoose.model('Alert', alertSchema);
+

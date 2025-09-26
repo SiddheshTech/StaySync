@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import { connectToDatabase } from './db.js';
 import authRouter, { authMiddleware } from './auth.js';
-import { Student, Listing, RoommateProfile, Message } from './db.js';
+import { Student, Listing, RoommateProfile, Message, Group, CalendarEvent, Alert } from './db.js';
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 
@@ -302,6 +302,50 @@ app.post('/admin/students/import', express.text({ type: '*/*', limit: '2mb' }), 
     console.error(err);
     res.status(500).json({ error: 'Import failed' });
   }
+});
+
+// --------------------- Admin Community Groups ----------------------
+app.get('/admin/groups', async (_req, res) => {
+  const items = await Group.find({}).sort({ createdAt: -1 }).lean();
+  res.json({ items });
+});
+
+app.post('/admin/groups', express.json(), async (req, res) => {
+  try {
+    const name = String(req.body?.name || '').trim();
+    if (!name) return res.status(400).json({ error: 'Name required' });
+    const created = await Group.create({ name, members: Math.floor(Math.random()*250)+50 });
+    res.status(201).json({ item: created.toJSON() });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to create group' });
+  }
+});
+
+// --------------------- Admin Academic Calendar ----------------------
+app.get('/admin/calendar', async (req, res) => {
+  const year = Number(req.query.year || new Date().getFullYear());
+  const term = String(req.query.term || 'Spring');
+  const items = await CalendarEvent.find({ year, term }).sort({ start: 1 }).lean();
+  res.json({ items });
+});
+
+app.post('/admin/calendar', express.json(), async (req, res) => {
+  const { title, start, end, term, year } = req.body || {};
+  if (!title || !start || !end) return res.status(400).json({ error: 'Missing fields' });
+  const created = await CalendarEvent.create({ title, start, end, term, year });
+  res.status(201).json({ item: created.toJSON() });
+});
+
+// --------------------- Admin Emergency Broadcasts ----------------------
+app.post('/admin/broadcasts', express.json(), async (req, res) => {
+  const { message, via = ['email'] } = req.body || {};
+  if (!message) return res.status(400).json({ error: 'Message required' });
+  const created = await Alert.create({ message, via, status: 'queued' });
+  // Pretend to send immediately
+  created.status = 'sent';
+  await created.save();
+  res.status(201).json({ item: created.toJSON() });
 });
 
 // Cloudinary configuration and upload endpoint

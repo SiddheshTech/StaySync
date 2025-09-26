@@ -71,18 +71,8 @@ const AdminStudentsPage = () => {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Community Management</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-32 rounded-md bg-muted flex items-center justify-center text-muted-foreground">
-              University-specific groups placeholder
-            </div>
-          </CardContent>
-        </Card>
-
+      {/* Students directory - full width */}
+      <div className="grid grid-cols-1 gap-4">
         <Card>
           <CardHeader>
             <CardTitle>Students Directory</CardTitle>
@@ -141,37 +131,82 @@ const AdminStudentsPage = () => {
 
       <Separator />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {/* Interactive dummies (full width) */}
+      <div className="grid grid-cols-1 gap-4">
+        {/* Community management */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Community Management</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex gap-2">
+              <Input placeholder="Create group (e.g., North Campus Residents)" />
+              <Button variant="outline">Add</Button>
+            </div>
+            <div className="space-y-2 text-sm">
+              {[{ name: 'Quiet Study Roommates', members: 128 }, { name: 'Budget-Friendly Housing', members: 214 }, { name: 'Pet-Friendly Rentals', members: 96 }].map(g => (
+                <div key={g.name} className="flex items-center justify-between border rounded-md p-2">
+                  <div className="font-medium">{g.name}</div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary">{g.members} members</Badge>
+                    <Button size="sm" variant="outline">Manage</Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Academic Calendar */}
         <Card>
           <CardHeader>
             <CardTitle>Academic Calendar</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="h-24 rounded-md bg-muted flex items-center justify-center text-muted-foreground">
-              Calendar integration placeholder
+          <CardContent className="space-y-3">
+            <div className="flex gap-2">
+              <Select defaultValue="2025">
+                <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2025">2025</SelectItem>
+                  <SelectItem value="2024">2024</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select defaultValue="spring">
+                <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="spring">Spring</SelectItem>
+                  <SelectItem value="summer">Summer</SelectItem>
+                  <SelectItem value="fall">Fall</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline">Export ICS</Button>
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Campus Resources</CardTitle>
-          </CardHeader>
-          <CardContent>
             <ul className="text-sm space-y-2">
-              <li>Housing Office Contacts</li>
-              <li>Counseling & Support</li>
-              <li>Emergency Services</li>
+              <li className="flex items-center justify-between border rounded-md p-2"><span>Semester Begins</span><Badge variant="secondary">Jan 15</Badge></li>
+              <li className="flex items-center justify-between border rounded-md p-2"><span>Midterms Window</span><Badge variant="secondary">Mar 10 - Mar 20</Badge></li>
+              <li className="flex items-center justify-between border rounded-md p-2"><span>Spring Break</span><Badge variant="secondary">Apr 1 - Apr 7</Badge></li>
+              <li className="flex items-center justify-between border rounded-md p-2"><span>Finals Week</span><Badge variant="secondary">May 20 - May 27</Badge></li>
             </ul>
           </CardContent>
         </Card>
+
+        {/* Emergency Coordination */}
         <Card>
           <CardHeader>
             <CardTitle>Emergency Coordination</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="h-24 rounded-md bg-muted flex items-center justify-center text-muted-foreground">
-              Contact workflows placeholder
+          <CardContent className="space-y-3">
+            <div className="flex gap-2">
+              <Input placeholder="Broadcast message (e.g., Water outage on West Campus)" />
+              <Button className="btn-hero">Send</Button>
             </div>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <Button variant="outline">Open Incident Room</Button>
+              <Button variant="outline">Download Contacts</Button>
+              <Button variant="outline">Test SMS</Button>
+              <Button variant="outline">Test Email</Button>
+            </div>
+            <div className="text-xs text-muted-foreground">This is a demo interface. Hook to incident APIs to go live.</div>
           </CardContent>
         </Card>
       </div>
