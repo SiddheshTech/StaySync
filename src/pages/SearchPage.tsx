@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import BrandBar from '@/components/BrandBar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -101,6 +101,9 @@ const SearchPage = () => {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [searchAlerts, setSearchAlerts] = useState<any[]>([]);
   const [showSearchAnalytics, setShowSearchAnalytics] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
   
   // Derived: active filters summary
   const activeFilterChips = useMemo(() => {
@@ -472,6 +475,13 @@ const SearchPage = () => {
     }
   }, [filteredListings, sortBy]);
 
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(sortedListings.length / 5));
+  const paginatedListings = useMemo(() => {
+    const start = (page - 1) * 5;
+    return sortedListings.slice(start, start + 5);
+  }, [sortedListings, page]);
+
   // Save search functionality
   const saveSearch = () => {
     const searchParams = {
@@ -483,7 +493,12 @@ const SearchPage = () => {
       bedrooms: bedroomCount,
       bathrooms: bathroomCount
     };
-    setSavedSearches(prev => [...prev, JSON.stringify(searchParams)]);
+    const payload = JSON.stringify(searchParams);
+    setSavedSearches(prev => [...prev, payload]);
+    try {
+      const existing = JSON.parse(localStorage.getItem('savedSearches') || '[]');
+      localStorage.setItem('savedSearches', JSON.stringify([...existing, payload]));
+    } catch {}
   };
 
   // Add to comparison
@@ -513,7 +528,46 @@ const SearchPage = () => {
     setDistanceRange([0, 5]);
     setBedroomCount(null);
     setBathroomCount(null);
+    setPage(1);
   };
+
+  // URL <-> state sync
+  useEffect(() => {
+    const q = searchParams.get('q') || '';
+    const min = Number(searchParams.get('min')) || 15000;
+    const max = Number(searchParams.get('max')) || 60000;
+    const type = searchParams.get('type');
+    const beds = searchParams.get('beds');
+    const baths = searchParams.get('baths');
+    const dist = Number(searchParams.get('dist'));
+    const amen = searchParams.get('amen');
+    if (q) setSearchQuery(q);
+    setBudgetRange([min, max]);
+    if (type) setSelectedTypes(type === 'all' ? ['apartment','roommate'] : [type]);
+    if (beds) setBedroomCount(Number(beds));
+    if (baths) setBathroomCount(Number(baths));
+    if (!Number.isNaN(dist) && dist > 0) setDistanceRange([0, dist]);
+    if (amen) setSelectedAmenities(amen.split(',').filter(Boolean));
+    try {
+      const saved = JSON.parse(localStorage.getItem('savedSearches') || '[]');
+      setSavedSearches(saved);
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const params: any = {};
+    if (searchQuery) params.q = searchQuery;
+    if (budgetRange[0] !== 15000) params.min = String(budgetRange[0]);
+    if (budgetRange[1] !== 60000) params.max = String(budgetRange[1]);
+    if (!(selectedTypes.length === 2)) params.type = selectedTypes[0];
+    if (bedroomCount !== null) params.beds = String(bedroomCount);
+    if (bathroomCount !== null) params.baths = String(bathroomCount);
+    if (distanceRange[1] !== 5) params.dist = String(distanceRange[1]);
+    if (selectedAmenities.length) params.amen = selectedAmenities.join(',');
+    setSearchParams(params, { replace: true });
+    setPage(1);
+  }, [searchQuery, budgetRange, selectedTypes, bedroomCount, bathroomCount, distanceRange, selectedAmenities, setSearchParams]);
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
@@ -725,12 +779,12 @@ const SearchPage = () => {
                     {['WiFi', 'Parking', 'Laundry', 'Gym', 'Pool', 'Study Room'].map((amenity) => {
                       const checked = selectedAmenities.includes(amenity);
                       return (
-                        <div key={amenity} className="flex items-center space-x-2">
+                      <div key={amenity} className="flex items-center space-x-2">
                           <Checkbox id={amenity} checked={checked} onCheckedChange={(v) => {
                             setSelectedAmenities(prev => v ? [...prev, amenity] : prev.filter(a => a !== amenity));
                           }} />
-                          <Label htmlFor={amenity} className="text-sm">{amenity}</Label>
-                        </div>
+                        <Label htmlFor={amenity} className="text-sm">{amenity}</Label>
+                      </div>
                       );
                     })}
                   </div>
@@ -768,7 +822,7 @@ const SearchPage = () => {
                     ].map((range) => (
                       <Button key={range.join('-')} size="sm" variant="outline" onClick={() => setBudgetRange(range as [number,number])}>
                         ₹{range[0].toLocaleString()}–₹{range[1].toLocaleString()}
-                      </Button>
+                </Button>
                     ))}
                   </div>
                 </div>
@@ -800,7 +854,7 @@ const SearchPage = () => {
 
             {/* Listings Grid */}
             <div className="space-y-4">
-              {listings.map((listing) => (
+              {paginatedListings.map((listing) => (
                 <Card key={listing.id} className="card-hover">
                   <CardContent className="p-6">
                     <div className="flex flex-col lg:flex-row gap-6">
@@ -929,7 +983,7 @@ const SearchPage = () => {
                           
                           <div className="flex gap-2">
                             <Link to={`/listing/${listing.id}`}>
-                              <Button variant="outline" size="sm">View Details</Button>
+                            <Button variant="outline" size="sm">View Details</Button>
                             </Link>
                             <Button size="sm" className="btn-hero">
                               {listing.type === 'apartment' ? 'Contact' : 'Message'}
@@ -942,6 +996,15 @@ const SearchPage = () => {
                 </Card>
               ))}
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-6">
+                <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Prev</Button>
+                <span className="text-sm text-muted-foreground">Page {page} of {totalPages}</span>
+                <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>Next</Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
