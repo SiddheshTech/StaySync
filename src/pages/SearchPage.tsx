@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import BrandBar from '@/components/BrandBar';
@@ -10,6 +10,12 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   ArrowLeft,
   Search,
@@ -24,13 +30,79 @@ import {
   Car,
   Dumbbell,
   Coffee,
-  Calendar
+  Calendar,
+  Map,
+  List,
+  Grid3X3,
+  SortAsc,
+  SortDesc,
+  Save,
+  Bell,
+  Share2,
+  Eye,
+  Clock,
+  TrendingUp,
+  Award,
+  Shield,
+  Zap,
+  Target,
+  Bookmark,
+  FilterX,
+  RefreshCw,
+  Settings,
+  BarChart3,
+  Compass,
+  Layers,
+  Building,
+  TreePine,
+  Bus,
+  GraduationCap,
+  ShoppingBag,
+  Utensils,
+  Camera,
+  Video,
+  Play,
+  ChevronDown,
+  ChevronUp,
+  X,
+  Plus,
+  Minus,
+  Check,
+  AlertCircle,
+  Info,
+  Lightbulb,
+  Sparkles,
+  BookOpen,
+  Droplets,
+  Waves
 } from 'lucide-react';
 
 const SearchPage = () => {
+  // State management for comprehensive search functionality
   const [budgetRange, setBudgetRange] = useState([500, 2000]);
   const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'grid' | 'map'>('list');
+  const [sortBy, setSortBy] = useState('relevance');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>(['apartment', 'roommate']);
+  const [distanceRange, setDistanceRange] = useState([0, 5]);
+  const [bedroomCount, setBedroomCount] = useState<number | null>(null);
+  const [bathroomCount, setBathroomCount] = useState<number | null>(null);
+  const [priceSort, setPriceSort] = useState<'asc' | 'desc' | null>(null);
+  const [savedSearches, setSavedSearches] = useState<string[]>([]);
+  const [comparisonList, setComparisonList] = useState<number[]>([]);
+  const [showComparison, setShowComparison] = useState(false);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [favoriteListings, setFavoriteListings] = useState<number[]>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [searchAlerts, setSearchAlerts] = useState<any[]>([]);
+  const [showSearchAnalytics, setShowSearchAnalytics] = useState(false);
 
+  // Enhanced listings data with comprehensive information
   const listings = [
     {
       id: 1,
@@ -41,18 +113,46 @@ const SearchPage = () => {
       bedrooms: 0,
       bathrooms: 1,
       sqft: 450,
-      amenities: ['WiFi', 'Laundry', 'Parking'],
+      amenities: ['WiFi', 'Laundry', 'Parking', 'Gym', 'Pool', 'Study Room'],
       rating: 4.8,
       reviews: 24,
-      distance: '0.3 miles from campus',
+      distance: 0.3,
       available: '2024-08-01',
       landlord: {
         name: 'Berkeley Properties',
         rating: 4.6,
-        avatar: 'BP'
+        avatar: 'BP',
+        verified: true,
+        responseTime: '2 hours'
       },
-      images: 3,
-      featured: true
+      images: 8,
+      featured: true,
+      moveInDate: '2024-08-01',
+      leaseLength: '12 months',
+      deposit: 1200,
+      utilities: 'Included',
+      petFriendly: false,
+      smokingAllowed: false,
+      furnished: true,
+      airConditioning: true,
+      heating: true,
+      dishwasher: true,
+      washerDryer: true,
+      balcony: false,
+      parking: 'Covered',
+      security: '24/7',
+      nearbyTransit: ['BART', 'AC Transit'],
+      walkScore: 85,
+      bikeScore: 92,
+      transitScore: 78,
+      description: 'Beautiful modern studio with premium amenities in the heart of downtown Berkeley. Perfect for students who want to be close to campus and city life.',
+      highlights: ['Prime Location', 'Modern Amenities', 'Student-Friendly'],
+      virtualTour: true,
+      videoTour: true,
+      lastUpdated: '2024-01-15',
+      views: 1247,
+      saves: 89,
+      applications: 12
     },
     {
       id: 2,
@@ -66,14 +166,45 @@ const SearchPage = () => {
         name: 'Emma Johnson',
         major: 'Computer Science',
         year: 'Junior',
-        avatar: 'EJ'
+        avatar: 'EJ',
+        age: 20,
+        interests: ['Coding', 'Hiking', 'Photography'],
+        lifestyle: 'Quiet, studious',
+        socialLevel: 'Medium',
+        cleanliness: 'Very Clean'
       },
-      amenities: ['WiFi', 'Kitchen', 'Study Room'],
+      amenities: ['WiFi', 'Kitchen', 'Study Room', 'Garden', 'Parking'],
       rating: 4.9,
       compatibility: 95,
-      distance: '0.8 miles from campus',
+      distance: 0.8,
       available: '2024-08-15',
-      images: 5
+      images: 6,
+      moveInDate: '2024-08-15',
+      leaseLength: 'Flexible',
+      deposit: 900,
+      utilities: 'Split',
+      petFriendly: true,
+      smokingAllowed: false,
+      furnished: false,
+      airConditioning: false,
+      heating: true,
+      dishwasher: true,
+      washerDryer: true,
+      balcony: true,
+      parking: 'Street',
+      security: 'Building',
+      nearbyTransit: ['AC Transit'],
+      walkScore: 72,
+      bikeScore: 85,
+      transitScore: 65,
+      description: 'Looking for a responsible female roommate to share a beautiful 2BR apartment. Great location with easy access to campus and local amenities.',
+      highlights: ['Female Only', 'Pet Friendly', 'Flexible Lease'],
+      virtualTour: false,
+      videoTour: true,
+      lastUpdated: '2024-01-14',
+      views: 892,
+      saves: 67,
+      applications: 8
     },
     {
       id: 3,
@@ -84,17 +215,45 @@ const SearchPage = () => {
       bedrooms: 1,
       bathrooms: 1,
       sqft: 600,
-      amenities: ['WiFi', 'Gym', 'Pool'],
+      amenities: ['WiFi', 'Gym', 'Pool', 'Laundry', 'Parking'],
       rating: 4.5,
       reviews: 18,
-      distance: '0.2 miles from campus',
+      distance: 0.2,
       available: '2024-09-01',
       landlord: {
         name: 'Campus Living LLC',
         rating: 4.3,
-        avatar: 'CL'
+        avatar: 'CL',
+        verified: true,
+        responseTime: '4 hours'
       },
-      images: 4
+      images: 5,
+      moveInDate: '2024-09-01',
+      leaseLength: '12 months',
+      deposit: 1500,
+      utilities: 'Not Included',
+      petFriendly: true,
+      smokingAllowed: false,
+      furnished: false,
+      airConditioning: true,
+      heating: true,
+      dishwasher: true,
+      washerDryer: true,
+      balcony: true,
+      parking: 'Assigned',
+      security: 'Building',
+      nearbyTransit: ['BART', 'AC Transit'],
+      walkScore: 78,
+      bikeScore: 88,
+      transitScore: 82,
+      description: 'Charming 1BR apartment just steps from campus. Perfect for graduate students who want convenience and comfort.',
+      highlights: ['Campus Proximity', 'Pet Friendly', 'Modern Building'],
+      virtualTour: true,
+      videoTour: false,
+      lastUpdated: '2024-01-13',
+      views: 1563,
+      saves: 134,
+      applications: 19
     },
     {
       id: 4,
@@ -108,17 +267,99 @@ const SearchPage = () => {
         name: 'Alex Chen',
         major: 'Physics PhD',
         year: 'Graduate',
-        avatar: 'AC'
+        avatar: 'AC',
+        age: 26,
+        interests: ['Research', 'Reading', 'Coffee'],
+        lifestyle: 'Very quiet, focused on studies',
+        socialLevel: 'Low',
+        cleanliness: 'Extremely Clean'
       },
-      amenities: ['WiFi', 'Parking', 'Quiet'],
+      amenities: ['WiFi', 'Parking', 'Quiet', 'Study Space', 'Kitchen'],
       rating: 4.7,
       compatibility: 88,
-      distance: '1.2 miles from campus',
+      distance: 1.2,
       available: '2024-08-01',
-      images: 2
+      images: 4,
+      moveInDate: '2024-08-01',
+      leaseLength: '12 months',
+      deposit: 750,
+      utilities: 'Split',
+      petFriendly: false,
+      smokingAllowed: false,
+      furnished: true,
+      airConditioning: false,
+      heating: true,
+      dishwasher: true,
+      washerDryer: true,
+      balcony: false,
+      parking: 'Garage',
+      security: 'Building',
+      nearbyTransit: ['AC Transit', 'BART'],
+      walkScore: 65,
+      bikeScore: 78,
+      transitScore: 72,
+      description: 'Quiet, studious environment perfect for graduate students. Looking for someone who values peace and academic focus.',
+      highlights: ['Quiet Environment', 'Grad Student', 'Furnished'],
+      virtualTour: false,
+      videoTour: false,
+      lastUpdated: '2024-01-12',
+      views: 634,
+      saves: 45,
+      applications: 6
+    },
+    {
+      id: 5,
+      type: 'apartment',
+      title: 'Luxury 2BR with Bay Views',
+      location: 'Berkeley Hills',
+      rent: 2800,
+      bedrooms: 2,
+      bathrooms: 2,
+      sqft: 1200,
+      amenities: ['WiFi', 'Gym', 'Pool', 'Laundry', 'Parking', 'Balcony', 'Dishwasher'],
+      rating: 4.9,
+      reviews: 31,
+      distance: 2.1,
+      available: '2024-07-15',
+      landlord: {
+        name: 'Hillside Properties',
+        rating: 4.8,
+        avatar: 'HP',
+        verified: true,
+        responseTime: '1 hour'
+      },
+      images: 12,
+      featured: true,
+      moveInDate: '2024-07-15',
+      leaseLength: '12 months',
+      deposit: 2800,
+      utilities: 'Not Included',
+      petFriendly: true,
+      smokingAllowed: false,
+      furnished: false,
+      airConditioning: true,
+      heating: true,
+      dishwasher: true,
+      washerDryer: true,
+      balcony: true,
+      parking: 'Garage',
+      security: '24/7',
+      nearbyTransit: ['AC Transit'],
+      walkScore: 45,
+      bikeScore: 65,
+      transitScore: 55,
+      description: 'Stunning 2BR apartment with panoramic bay views. Perfect for students who want luxury and space.',
+      highlights: ['Bay Views', 'Luxury Amenities', 'Spacious'],
+      virtualTour: true,
+      videoTour: true,
+      lastUpdated: '2024-01-11',
+      views: 2341,
+      saves: 198,
+      applications: 25
     }
   ];
 
+  // Comprehensive utility functions
   const getAmenityIcon = (amenity: string) => {
     switch (amenity.toLowerCase()) {
       case 'wifi':
@@ -127,28 +368,255 @@ const SearchPage = () => {
         return <Car className="w-3 h-3" />;
       case 'gym':
         return <Dumbbell className="w-3 h-3" />;
+      case 'laundry':
+        return <RefreshCw className="w-3 h-3" />;
+      case 'pool':
+        return <Waves className="w-3 h-3" />;
+      case 'study room':
+        return <BookOpen className="w-3 h-3" />;
+      case 'kitchen':
+        return <Utensils className="w-3 h-3" />;
+      case 'garden':
+        return <TreePine className="w-3 h-3" />;
+      case 'balcony':
+        return <Building className="w-3 h-3" />;
+      case 'dishwasher':
+        return <Droplets className="w-3 h-3" />;
       default:
         return <Coffee className="w-3 h-3" />;
     }
   };
 
+  // Advanced filtering logic
+  const filteredListings = useMemo(() => {
+    return listings.filter(listing => {
+      // Search query filter
+      if (searchQuery && !listing.title.toLowerCase().includes(searchQuery.toLowerCase()) && 
+          !listing.location.toLowerCase().includes(searchQuery.toLowerCase())) {
+        return false;
+      }
+
+      // Budget filter
+      if (listing.rent < budgetRange[0] || listing.rent > budgetRange[1]) {
+        return false;
+      }
+
+      // Type filter
+      if (!selectedTypes.includes(listing.type)) {
+        return false;
+      }
+
+      // Distance filter
+      if (listing.distance < distanceRange[0] || listing.distance > distanceRange[1]) {
+        return false;
+      }
+
+      // Bedroom filter
+      if (bedroomCount !== null && listing.bedrooms !== bedroomCount) {
+        return false;
+      }
+
+      // Bathroom filter
+      if (bathroomCount !== null && listing.bathrooms !== bathroomCount) {
+        return false;
+      }
+
+      // Amenities filter
+      if (selectedAmenities.length > 0) {
+        const hasAllAmenities = selectedAmenities.every(amenity => 
+          listing.amenities.includes(amenity)
+        );
+        if (!hasAllAmenities) return false;
+      }
+
+      return true;
+    });
+  }, [listings, searchQuery, budgetRange, selectedTypes, distanceRange, bedroomCount, bathroomCount, selectedAmenities]);
+
+  // Sorting logic
+  const sortedListings = useMemo(() => {
+    const sorted = [...filteredListings];
+    
+    switch (sortBy) {
+      case 'price-low':
+        return sorted.sort((a, b) => a.rent - b.rent);
+      case 'price-high':
+        return sorted.sort((a, b) => b.rent - a.rent);
+      case 'rating':
+        return sorted.sort((a, b) => b.rating - a.rating);
+      case 'newest':
+        return sorted.sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime());
+      case 'distance':
+        return sorted.sort((a, b) => a.distance - b.distance);
+      case 'relevance':
+      default:
+        return sorted.sort((a, b) => {
+          // Featured listings first, then by rating
+          if (a.featured && !b.featured) return -1;
+          if (!a.featured && b.featured) return 1;
+          return b.rating - a.rating;
+        });
+    }
+  }, [filteredListings, sortBy]);
+
+  // Save search functionality
+  const saveSearch = () => {
+    const searchParams = {
+      query: searchQuery,
+      budget: budgetRange,
+      types: selectedTypes,
+      amenities: selectedAmenities,
+      distance: distanceRange,
+      bedrooms: bedroomCount,
+      bathrooms: bathroomCount
+    };
+    setSavedSearches(prev => [...prev, JSON.stringify(searchParams)]);
+  };
+
+  // Add to comparison
+  const toggleComparison = (listingId: number) => {
+    setComparisonList(prev => 
+      prev.includes(listingId) 
+        ? prev.filter(id => id !== listingId)
+        : [...prev, listingId]
+    );
+  };
+
+  // Toggle favorite
+  const toggleFavorite = (listingId: number) => {
+    setFavoriteListings(prev => 
+      prev.includes(listingId) 
+        ? prev.filter(id => id !== listingId)
+        : [...prev, listingId]
+    );
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchQuery('');
+    setBudgetRange([500, 2000]);
+    setSelectedTypes(['apartment', 'roommate']);
+    setSelectedAmenities([]);
+    setDistanceRange([0, 5]);
+    setBedroomCount(null);
+    setBathroomCount(null);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-subtle">
-      <BrandBar badgeText="Browse Listings" />
+      <BrandBar badgeText="Advanced Search" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        {/* Enhanced Header with Search Analytics */}
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-8">
+          <div className="flex items-center gap-4">
           <Link to="/dashboard">
-            <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="hover-lift">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Dashboard
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Browse Listings</h1>
-            <p className="text-muted-foreground">Find your perfect housing match</p>
+              <h1 className="text-4xl font-bold text-gradient bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Advanced Search
+              </h1>
+              <p className="text-muted-foreground text-lg">Find your perfect housing match with AI-powered recommendations</p>
+            </div>
+          </div>
+          
+          {/* Search Analytics Toggle */}
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowSearchAnalytics(!showSearchAnalytics)}
+              className="hover-lift"
+            >
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Analytics
+            </Button>
+            <Button
+              variant="outline"
+              onClick={saveSearch}
+              className="hover-lift"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              Save Search
+            </Button>
           </div>
         </div>
+
+        {/* Search Analytics Panel */}
+        {showSearchAnalytics && (
+          <Card className="mb-8 card-gradient">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5" />
+                Search Analytics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">{sortedListings.length}</div>
+                  <div className="text-sm text-muted-foreground">Total Results</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-accent">${Math.round((budgetRange[0] + budgetRange[1]) / 2)}</div>
+                  <div className="text-sm text-muted-foreground">Avg. Budget</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-success">4.7</div>
+                  <div className="text-sm text-muted-foreground">Avg. Rating</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-warning">0.8</div>
+                  <div className="text-sm text-muted-foreground">Avg. Distance</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Enhanced Search Bar */}
+        <Card className="mb-8 card-gradient">
+          <CardContent className="p-6">
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                  <Input
+                    placeholder="Search by location, property name, or amenities..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-12 h-12 text-lg"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="hover-lift"
+                >
+                  <Filter className="w-4 h-4 mr-2" />
+                  Filters
+                  {selectedAmenities.length > 0 && (
+                    <Badge variant="secondary" className="ml-2">
+                      {selectedAmenities.length}
+                    </Badge>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={clearFilters}
+                  className="hover-lift"
+                >
+                  <FilterX className="w-4 h-4 mr-2" />
+                  Clear
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Filters Sidebar */}
