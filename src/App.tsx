@@ -18,6 +18,7 @@ import EditProfilePage from "./pages/EditProfilePage";
 import MessagesPage from "./pages/MessagesPage";
 import ApplicationsPage from "./pages/ApplicationsPage";
 import SearchPage from "./pages/SearchPage";
+import ListingDetailPage from "./pages/ListingDetailPage";
   
 import CreateListingPage from "./pages/CreateListingPage";
 import NotFound from "./pages/NotFound";
@@ -59,6 +60,7 @@ const App = () => (
             <Route path="/messages" element={<MessagesPage />} />
             <Route path="/applications" element={<ApplicationsPage />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/listing/:id" element={<ListingDetailPage />} />
             <Route path="/create-listing" element={<CreateListingPage />} />
             <Route path="/student" element={<StudentLayout />}>
               <Route index element={<StudentDashboardPage />} />

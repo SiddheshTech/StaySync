@@ -10,14 +10,17 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const { pathname } = useLocation();
   const sidebarRoutes = ['/dashboard', '/profile', '/messages', '/applications', '/billing', '/help'];
+  const brandBarRoutes = ['/search', '/listing', '/create-listing'];
   const hideChrome = sidebarRoutes.some((prefix) => pathname.startsWith(prefix));
+  const hasBrandBar = brandBarRoutes.some((prefix) => pathname.startsWith(prefix));
+  const showHeaderFooter = !hideChrome && !hasBrandBar;
   return (
     <div className="min-h-screen flex flex-col">
-      {!hideChrome && <Header />}
-      <main className={hideChrome ? 'flex-1' : 'flex-1 pt-16'}>
+      {showHeaderFooter && <Header />}
+      <main className={showHeaderFooter ? 'flex-1 pt-16' : 'flex-1'}>
         {children}
       </main>
-      {!hideChrome && <Footer />}
+      {showHeaderFooter && <Footer />}
     </div>
   );
 };

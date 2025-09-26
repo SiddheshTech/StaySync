@@ -877,7 +877,9 @@ const SearchPage = () => {
                           )}
                           
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm">View Details</Button>
+                            <Link to={`/listing/${listing.id}`}>
+                              <Button variant="outline" size="sm">View Details</Button>
+                            </Link>
                             <Button size="sm" className="btn-hero">
                               {listing.type === 'apartment' ? 'Contact' : 'Message'}
                             </Button>
