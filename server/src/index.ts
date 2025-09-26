@@ -1,17 +1,23 @@
+import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import type { AddressInfo } from 'net';
 import cors from 'cors';
+import authRouter from './auth.js';
 
 const app = express();
 
 // Middleware
-app.use(cors({ origin: true, credentials: true }));
+const corsOrigin = process.env.CORS_ORIGIN === '*' ? true : (process.env.CORS_ORIGIN || true);
+app.use(cors({ origin: corsOrigin, credentials: true }));
 app.use(express.json());
 
 // Health check
 app.get('/health', (_req: Request, res: Response) => {
   res.json({ status: 'ok' });
 });
+// Auth routes
+app.use('/auth', authRouter);
+
 
 // Student dashboard route
 app.get('/student/dashboard', (_req: Request, res: Response) => {
