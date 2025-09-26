@@ -44,7 +44,7 @@ const PricingPage = () => {
     },
     {
       name: 'Premium',
-      price: 9.99,
+      price: 799,
       period: 'month',
       description: 'Enhanced features for serious housing seekers',
       icon: Zap,
@@ -95,7 +95,7 @@ const PricingPage = () => {
     },
     {
       question: 'What does Premium add that Free doesn\'t have?',
-      answer: 'Premium includes our advanced AI matching algorithm, unlimited messaging, priority placement in search results, background check access, priority support, and advanced search filters. It\'s designed for students who want the best possible matching experience.'
+      answer: 'Premium includes our advanced AI matching algorithm, unlimited messaging, priority placement in search results, background check access, priority support, and advanced search filters. At just ₹799/month (less than the cost of two cups of coffee), it\'s designed for students who want the best possible matching experience.'
     },
     {
       question: 'How do University Sponsored accounts work?',
@@ -107,11 +107,11 @@ const PricingPage = () => {
     },
     {
       question: 'Are there any hidden fees or charges?',
-      answer: 'No hidden fees ever! The prices shown are exactly what you pay. Background checks through our partner service have a separate fee, but this is clearly disclosed and completely optional.'
+      answer: 'No hidden fees ever! The prices shown are exactly what you pay. We accept all major Indian payment methods including UPI, Net Banking, Credit/Debit cards, and digital wallets. Background checks through our partner service have a separate fee, but this is clearly disclosed and completely optional.'
     },
     {
       question: 'Do you offer student discounts?',
-      answer: 'Our free plan is already designed with students in mind! Premium is priced affordably at less than the cost of a pizza per month. Some universities also sponsor premium access for their students.'
+      answer: 'Our free plan is already designed with students in mind! Premium is priced affordably at just ₹799/month (less than the cost of a meal at a good restaurant). Some universities also sponsor premium access for their students.'
     }
   ];
 
@@ -139,14 +139,15 @@ const PricingPage = () => {
   ];
 
   const universityPartners = [
-    'Stanford University', 'UC Berkeley', 'MIT', 'NYU', 'USC', 'UT Austin',
-    'Harvard University', 'Yale University', 'Columbia University', 'UCLA'
+    'IIT Delhi', 'IIT Bombay', 'IIT Madras', 'IIT Kanpur', 'IIT Kharagpur',
+    'Delhi University', 'JNU', 'Jamia Millia', 'Amity University', 'BITS Pilani',
+    'Stanford University', 'UC Berkeley', 'MIT', 'NYU', 'Harvard University'
   ];
 
   const stats = [
     { number: '95%', label: 'Success Rate' },
     { number: '50K+', label: 'Happy Students' },
-    { number: '$0', label: 'Setup Fees' },
+    { number: '₹0', label: 'Setup Fees' },
     { number: '24/7', label: 'Support Available' }
   ];
 
@@ -166,7 +167,7 @@ const PricingPage = () => {
             </h1>
             <p className="text-xl text-muted-foreground max-w-4xl mx-auto mb-8">
               Start completely free with all essential features, or upgrade to Premium 
-              for advanced matching and priority support. No hidden fees, ever.
+              for just ₹799/month for advanced matching and priority support. No hidden fees, ever.
             </p>
             
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
@@ -202,7 +203,7 @@ const PricingPage = () => {
                   </div>
                   <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
                   <div className="mb-4">
-                    <span className="text-4xl font-bold">${plan.price}</span>
+                    <span className="text-4xl font-bold">₹{plan.price}</span>
                     <span className="text-muted-foreground">/{plan.period}</span>
                   </div>
                   <p className="text-muted-foreground">{plan.description}</p>
@@ -350,7 +351,7 @@ const PricingPage = () => {
             Ready to Find Your Perfect Housing?
           </h2>
           <p className="text-xl mb-8 opacity-90">
-            Start with our free plan and upgrade anytime. No contracts, no hidden fees, 
+            Start with our free plan and upgrade anytime for just ₹799/month. No contracts, no hidden fees, 
             just safe and successful housing matches.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

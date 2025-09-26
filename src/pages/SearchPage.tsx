@@ -79,7 +79,7 @@ import {
 
 const SearchPage = () => {
   // State management for comprehensive search functionality
-  const [budgetRange, setBudgetRange] = useState([500, 2000]);
+  const [budgetRange, setBudgetRange] = useState([15000, 60000]);
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'grid' | 'map'>('list');
   const [sortBy, setSortBy] = useState('relevance');
@@ -107,16 +107,16 @@ const SearchPage = () => {
     {
       id: 1,
       type: 'apartment',
-      title: 'Modern Studio in Downtown Berkeley',
-      location: 'Downtown Berkeley',
-      rent: 1200,
+      title: 'Modern Studio in Connaught Place',
+      location: 'Connaught Place, Delhi',
+      rent: 25000,
       bedrooms: 0,
       bathrooms: 1,
       sqft: 450,
       amenities: ['WiFi', 'Laundry', 'Parking', 'Gym', 'Pool', 'Study Room'],
       rating: 4.8,
       reviews: 24,
-      distance: 0.3,
+      distance: 0.5,
       available: '2024-08-01',
       landlord: {
         name: 'Berkeley Properties',
@@ -129,7 +129,7 @@ const SearchPage = () => {
       featured: true,
       moveInDate: '2024-08-01',
       leaseLength: '12 months',
-      deposit: 1200,
+      deposit: 25000,
       utilities: 'Included',
       petFriendly: false,
       smokingAllowed: false,
@@ -158,8 +158,8 @@ const SearchPage = () => {
       id: 2,
       type: 'roommate',
       title: 'Looking for Female Roommate - 2BR Apartment',
-      location: 'North Berkeley',
-      rent: 900,
+      location: 'Koramangala, Bangalore',
+      rent: 18000,
       bedrooms: 1,
       bathrooms: 1,
       roommate: {
@@ -176,12 +176,12 @@ const SearchPage = () => {
       amenities: ['WiFi', 'Kitchen', 'Study Room', 'Garden', 'Parking'],
       rating: 4.9,
       compatibility: 95,
-      distance: 0.8,
+      distance: 1.2,
       available: '2024-08-15',
       images: 6,
       moveInDate: '2024-08-15',
       leaseLength: 'Flexible',
-      deposit: 900,
+      deposit: 18000,
       utilities: 'Split',
       petFriendly: true,
       smokingAllowed: false,
@@ -210,15 +210,15 @@ const SearchPage = () => {
       id: 3,
       type: 'apartment',
       title: 'Cozy 1BR Near Campus',
-      location: 'Southside Berkeley',
-      rent: 1500,
+      location: 'Powai, Mumbai',
+      rent: 30000,
       bedrooms: 1,
       bathrooms: 1,
       sqft: 600,
       amenities: ['WiFi', 'Gym', 'Pool', 'Laundry', 'Parking'],
       rating: 4.5,
       reviews: 18,
-      distance: 0.2,
+      distance: 0.8,
       available: '2024-09-01',
       landlord: {
         name: 'Campus Living LLC',
@@ -230,7 +230,7 @@ const SearchPage = () => {
       images: 5,
       moveInDate: '2024-09-01',
       leaseLength: '12 months',
-      deposit: 1500,
+      deposit: 30000,
       utilities: 'Not Included',
       petFriendly: true,
       smokingAllowed: false,
@@ -259,8 +259,8 @@ const SearchPage = () => {
       id: 4,
       type: 'roommate',
       title: 'Grad Student Seeking Quiet Roommate',
-      location: 'Albany',
-      rent: 750,
+      location: 'Indiranagar, Bangalore',
+      rent: 15000,
       bedrooms: 1,
       bathrooms: 1,
       roommate: {
@@ -277,12 +277,12 @@ const SearchPage = () => {
       amenities: ['WiFi', 'Parking', 'Quiet', 'Study Space', 'Kitchen'],
       rating: 4.7,
       compatibility: 88,
-      distance: 1.2,
+      distance: 2.1,
       available: '2024-08-01',
       images: 4,
       moveInDate: '2024-08-01',
       leaseLength: '12 months',
-      deposit: 750,
+      deposit: 15000,
       utilities: 'Split',
       petFriendly: false,
       smokingAllowed: false,
@@ -310,16 +310,16 @@ const SearchPage = () => {
     {
       id: 5,
       type: 'apartment',
-      title: 'Luxury 2BR with Bay Views',
-      location: 'Berkeley Hills',
-      rent: 2800,
+      title: 'Luxury 2BR with City Views',
+      location: 'Bandra West, Mumbai',
+      rent: 56000,
       bedrooms: 2,
       bathrooms: 2,
       sqft: 1200,
       amenities: ['WiFi', 'Gym', 'Pool', 'Laundry', 'Parking', 'Balcony', 'Dishwasher'],
       rating: 4.9,
       reviews: 31,
-      distance: 2.1,
+      distance: 3.5,
       available: '2024-07-15',
       landlord: {
         name: 'Hillside Properties',
@@ -332,7 +332,7 @@ const SearchPage = () => {
       featured: true,
       moveInDate: '2024-07-15',
       leaseLength: '12 months',
-      deposit: 2800,
+      deposit: 56000,
       utilities: 'Not Included',
       petFriendly: true,
       smokingAllowed: false,
@@ -494,7 +494,7 @@ const SearchPage = () => {
   // Clear all filters
   const clearFilters = () => {
     setSearchQuery('');
-    setBudgetRange([500, 2000]);
+    setBudgetRange([15000, 60000]);
     setSelectedTypes(['apartment', 'roommate']);
     setSelectedAmenities([]);
     setDistanceRange([0, 5]);
@@ -560,7 +560,7 @@ const SearchPage = () => {
                   <div className="text-sm text-muted-foreground">Total Results</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-accent">${Math.round((budgetRange[0] + budgetRange[1]) / 2)}</div>
+                  <div className="text-2xl font-bold text-accent">₹{Math.round((budgetRange[0] + budgetRange[1]) / 2).toLocaleString()}</div>
                   <div className="text-sm text-muted-foreground">Avg. Budget</div>
                 </div>
                 <div className="text-center">
@@ -584,7 +584,7 @@ const SearchPage = () => {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                   <Input
-                    placeholder="Search by location, property name, or amenities..."
+                    placeholder="Search by location (Delhi, Mumbai, Bangalore...), property name, or amenities..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-12 h-12 text-lg"
@@ -634,7 +634,7 @@ const SearchPage = () => {
                   <Label>Search Location</Label>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input placeholder="Berkeley, Oakland..." className="pl-10" />
+                    <Input placeholder="Delhi, Mumbai, Bangalore..." className="pl-10" />
                   </div>
                 </div>
 
@@ -660,14 +660,14 @@ const SearchPage = () => {
                     <Slider
                       value={budgetRange}
                       onValueChange={setBudgetRange}
-                      max={3000}
-                      min={400}
-                      step={50}
+                      max={100000}
+                      min={10000}
+                      step={5000}
                       className="w-full"
                     />
                     <div className="flex justify-between text-sm text-muted-foreground mt-1">
-                      <span>${budgetRange[0]}</span>
-                      <span>${budgetRange[1]}</span>
+                      <span>₹{budgetRange[0].toLocaleString()}</span>
+                      <span>₹{budgetRange[1].toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
@@ -731,7 +731,7 @@ const SearchPage = () => {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl font-semibold">{listings.length} listings found</h2>
-                <p className="text-muted-foreground">Showing results for Berkeley area</p>
+                <p className="text-muted-foreground">Showing results for Indian cities</p>
               </div>
               <Select defaultValue="relevance">
                 <SelectTrigger className="w-48">
@@ -786,7 +786,7 @@ const SearchPage = () => {
 
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                           <div className="text-center">
-                            <p className="text-2xl font-bold text-primary">${listing.rent}</p>
+                            <p className="text-2xl font-bold text-primary">₹{listing.rent.toLocaleString()}</p>
                             <p className="text-xs text-muted-foreground">per month</p>
                           </div>
                           

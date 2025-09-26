@@ -18,6 +18,8 @@ import EditProfilePage from "./pages/EditProfilePage";
 import MessagesPage from "./pages/MessagesPage";
 import ApplicationsPage from "./pages/ApplicationsPage";
 import SearchPage from "./pages/SearchPage";
+  
+import CreateListingPage from "./pages/CreateListingPage";
 import NotFound from "./pages/NotFound";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
@@ -25,6 +27,13 @@ import AdminStudentsPage from "./pages/admin/AdminStudentsPage";
 import AdminReportsPage from "./pages/admin/AdminReportsPage";
 import AdminModerationPage from "./pages/admin/AdminModerationPage";
 import AdminSupportPage from "./pages/admin/AdminSupportPage";
+import StudentLayout from "./pages/student/StudentLayout";
+import StudentDashboardPage from "./pages/student/DashboardPage";
+import StudentCommunityPage from "./pages/student/CommunityPage";
+import StudentProfilePage from "./pages/student/ProfilePage";
+import StudentEditProfilePage from "./pages/student/EditProfilePage";
+import StudentMessagesPage from "./pages/student/MessagesPage";
+import StudentApplicationsPage from "./pages/student/ApplicationsPage";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +59,16 @@ const App = () => (
             <Route path="/messages" element={<MessagesPage />} />
             <Route path="/applications" element={<ApplicationsPage />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/create-listing" element={<CreateListingPage />} />
+            <Route path="/student" element={<StudentLayout />}>
+              <Route index element={<StudentDashboardPage />} />
+              <Route path="dashboard" element={<StudentDashboardPage />} />
+              <Route path="community" element={<StudentCommunityPage />} />
+              <Route path="profile" element={<StudentProfilePage />} />
+              <Route path="profile/edit/:section" element={<StudentEditProfilePage />} />
+              <Route path="messages" element={<StudentMessagesPage />} />
+              <Route path="applications" element={<StudentApplicationsPage />} />
+            </Route>
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboardPage />} />
               <Route path="students" element={<AdminStudentsPage />} />
