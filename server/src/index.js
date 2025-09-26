@@ -2,8 +2,10 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { connectToDatabase } from './db.js';
-import authRouter from './auth.js';
-import { Student, Listing } from './db.js';
+import authRouter, { authMiddleware } from './auth.js';
+import { Student, Listing, RoommateProfile, Message } from './db.js';
+import { v2 as cloudinary } from 'cloudinary';
+import multer from 'multer';
 
 const app = express();
 
@@ -107,6 +109,132 @@ app.get('/student/search', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to search listings' });
+  }
+});
+
+// Flatmates: roommate profiles search
+app.get('/roommates', async (req, res) => {
+  try {
+    const { q, city, min, max, gender, cleanliness, traits, interests, sort, page = 1, pageSize = 10 } = req.query;
+    const filter = {};
+    if (q) filter.$text = { $search: String(q) };
+    if (city && city !== 'any') filter.city = new RegExp(`^${String(city)}$`, 'i');
+    if (gender && gender !== 'any') filter.gender = gender;
+    if (cleanliness && cleanliness !== 'any') filter.cleanliness = cleanliness;
+    if (min || max) {
+      filter.budget = {};
+      if (min) filter.budget.$gte = Number(min);
+      if (max) filter.budget.$lte = Number(max);
+    }
+    if (traits) filter.traits = { $all: String(traits).split(',').filter(Boolean) };
+    if (interests) filter.interests = { $in: String(interests).split(',').filter(Boolean) };
+
+    const sortMap = {
+      relevance: { createdAt: -1 },
+      budgetAsc: { budget: 1 },
+      budgetDesc: { budget: -1 },
+    };
+    const sortBy = sortMap[String(sort || 'relevance')] || sortMap.relevance;
+
+    const pg = Math.max(1, Number(page));
+    const ps = Math.min(25, Math.max(1, Number(pageSize)));
+
+    const [items, total] = await Promise.all([
+      RoommateProfile.find(filter).sort(sortBy).skip((pg - 1) * ps).limit(ps).lean(),
+      RoommateProfile.countDocuments(filter)
+    ]);
+    res.json({ items, total, page: pg, pageSize: ps });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to search roommates' });
+  }
+});
+
+// Flatmates: profile by id
+app.get('/roommates/:id', async (req, res) => {
+  try {
+    const profile = await RoommateProfile.findById(req.params.id).lean();
+    if (!profile) {
+      res.status(404).json({ error: 'Not found' });
+      return;
+    }
+    res.json(profile);
+  } catch (err) {
+    res.status(400).json({ error: 'Invalid id' });
+  }
+});
+
+// Messaging: list messages in a thread
+app.get('/messages/:otherUserId', authMiddleware, async (req, res) => {
+  const a = String(req.userId);
+  const b = String(req.params.otherUserId);
+  const threadId = [a, b].sort().join(':');
+  const items = await Message.find({ threadId }).sort({ sentAt: 1 }).lean();
+  res.json({ items });
+});
+
+// Messaging: send message
+app.post('/messages/:otherUserId', authMiddleware, async (req, res) => {
+  const a = String(req.userId);
+  const b = String(req.params.otherUserId);
+  const threadId = [a, b].sort().join(':');
+  const text = String(req.body?.text || '').trim();
+  if (!text) {
+    res.status(400).json({ error: 'Message text required' });
+    return;
+  }
+  const created = await Message.create({ threadId, from: a, to: b, text });
+  res.status(201).json({ item: created.toJSON() });
+});
+
+// Cloudinary configuration and upload endpoint
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.post('/uploads/image', authMiddleware, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ error: 'No file provided' });
+      return;
+    }
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream({ folder: 'staysync' }, (error, uploadResult) => {
+        if (error) return reject(error);
+        resolve(uploadResult);
+      });
+      stream.end(req.file.buffer);
+    });
+    res.status(201).json({ url: result.secure_url, public_id: result.public_id });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Upload failed' });
+  }
+});
+
+// Seed sample roommate profiles (dev only)
+app.post('/dev/seed-roommates', async (_req, res) => {
+  try {
+    const count = await RoommateProfile.countDocuments();
+    if (count > 0) {
+      res.json({ status: 'already-seeded', count });
+      return;
+    }
+    const docs = [
+      { name: 'Ananya Sharma', university: 'IIT Bombay', budget: 20000, city: 'Mumbai', traits: ['Early Bird','Non-smoker','Vegetarian'], interests: ['Music','Reading'], cleanliness: 'High', gender: 'Female' },
+      { name: 'Rohit Mehta', university: 'IIT Delhi', budget: 25000, city: 'Delhi', traits: ['Night Owl','Non-smoker'], interests: ['Gym','Cricket'], cleanliness: 'Medium', gender: 'Male' },
+      { name: 'Sara Khan', university: 'BITS Pilani', budget: 18000, city: 'Bangalore', traits: ['Pet Friendly','Vegetarian'], interests: ['Coffee','Design'], cleanliness: 'High', gender: 'Female' },
+      { name: 'Dev Patel', university: 'IIM Bangalore', budget: 30000, city: 'Bangalore', traits: ['Quiet','Non-smoker'], interests: ['Startups','Coding'], cleanliness: 'High', gender: 'Male' },
+    ];
+    const inserted = await RoommateProfile.insertMany(docs);
+    res.json({ status: 'seeded', count: inserted.length });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Seed failed' });
   }
 });
 

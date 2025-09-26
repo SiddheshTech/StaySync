@@ -11,7 +11,7 @@ function signToken(payload) {
   return jwt.sign(payload, secret, { expiresIn });
 }
 
-function authMiddleware(req, res, next) {
+export function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     res.status(401).json({ error: 'Unauthorized' });

@@ -32,6 +32,8 @@ import StudentLayout from "./pages/student/StudentLayout";
 import StudentDashboardPage from "./pages/student/DashboardPage";
 import StudentCommunityPage from "./pages/student/CommunityPage";
 import StudentFlatmatesPage from "./pages/student/FlatmatesPage";
+import RoommateProfilePage from "./pages/student/RoommateProfilePage";
+import ConversationPage from "./pages/student/ConversationPage";
 import StudentProfilePage from "./pages/student/ProfilePage";
 import StudentEditProfilePage from "./pages/student/EditProfilePage";
 import StudentMessagesPage from "./pages/student/MessagesPage";
@@ -69,6 +71,8 @@ const App = () => (
               <Route path="community" element={<StudentCommunityPage />} />
               <Route path="search" element={<SearchPage />} />
               <Route path="flatmates" element={<StudentFlatmatesPage />} />
+              <Route path="flatmates/:id" element={<RoommateProfilePage />} />
+              <Route path="messages/:id" element={<ConversationPage />} />
               <Route path="profile" element={<StudentProfilePage />} />
               <Route path="profile/edit/:section" element={<StudentEditProfilePage />} />
               <Route path="messages" element={<StudentMessagesPage />} />

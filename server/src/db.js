@@ -121,3 +121,40 @@ listingSchema.index({ title: 'text', location: 'text' });
 export const Listing = mongoose.model('Listing', listingSchema);
 
 
+// Roommate profile schema used by the Flatmates feature
+const roommateProfileSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, index: true },
+    university: { type: String, index: true },
+    city: { type: String, index: true },
+    gender: { type: String, enum: ['Male','Female','Other'], index: true },
+    budget: { type: Number, index: true },
+    cleanliness: { type: String, enum: ['High','Medium','Low'], default: 'Medium' },
+    traits: { type: [String], default: [] },
+    interests: { type: [String], default: [] },
+    bio: { type: String, default: '' },
+    avatarUrl: { type: String },
+    owner: { type: mongoose.Schema.Types.ObjectId, ref: 'Student', index: true },
+  },
+  { timestamps: true }
+);
+
+roommateProfileSchema.index({ name: 'text', university: 'text', city: 'text', bio: 'text' });
+
+export const RoommateProfile = mongoose.model('RoommateProfile', roommateProfileSchema);
+
+// Message thread schema (simple direct chat between two users)
+const messageSchema = new mongoose.Schema(
+  {
+    threadId: { type: String, index: true }, // `${aId}:${bId}` sorted
+    from: { type: mongoose.Schema.Types.ObjectId, ref: 'Student', index: true },
+    to: { type: mongoose.Schema.Types.ObjectId, ref: 'Student', index: true },
+    text: { type: String, required: true },
+    sentAt: { type: Date, default: Date.now }
+  },
+  { timestamps: true }
+);
+
+export const Message = mongoose.model('Message', messageSchema);
+
+
