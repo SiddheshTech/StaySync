@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import BrandBar from '@/components/BrandBar';
@@ -121,6 +121,7 @@ const ApplicationsPage = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [showWithdrawDialog, setShowWithdrawDialog] = useState(false);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+  const [summary, setSummary] = useState<any>({ total: 0, pending: 0, approved: 0, rejected: 0, successRate: 0 });
 
   const form = useForm<ApplicationFormValues>({
     resolver: zodResolver(applicationSchema),
@@ -135,10 +136,86 @@ const ApplicationsPage = () => {
     }
   });
 
-  const onSubmit = (values: ApplicationFormValues) => {
-    console.log('Application submitted', values);
-    toast({ title: 'Application submitted', description: 'Your application was submitted successfully.' });
+  const [apps, setApps] = useState<any[]>([]);
+  const onSubmit = async (values: ApplicationFormValues) => {
+    try {
+      const baseUrl = (import.meta as any).env?.VITE_API_URL || `${location.protocol}//${location.hostname}:8080`;
+      const token = localStorage.getItem('auth_token') || '';
+      const res = await fetch(`${baseUrl}/student/applications`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          applicant: {
+            firstName: values.firstName,
+            lastName: values.lastName,
+            email: values.email,
+            phone: values.phone,
+            university: values.university,
+            studentId: values.studentId
+          },
+          property: `${values.firstName} ${values.lastName} Application`,
+          location: values.university,
+          rent: `$${values.monthlyBudget}/month`,
+          moveInDate: values.targetMoveIn,
+          references: {
+            refName: values.refName,
+            refRelationship: values.refRelationship,
+            refPhone: values.refPhone,
+            refEmail: values.refEmail
+          },
+          financial: {
+            monthlyBudget: values.monthlyBudget,
+            incomeSource: values.incomeSource,
+            guarantor: values.guarantor || ''
+          },
+          history: {
+            prevAddress: values.prevAddress || '',
+            livingExperience: values.livingExperience || '',
+            landlordName: values.landlordName || '',
+            landlordPhone: values.landlordPhone || ''
+          },
+          compatibilityInfo: {
+            cleanliness: values.cleanliness,
+            noiseTolerance: values.noiseTolerance,
+            sleepSchedule: values.sleepSchedule,
+            allergies: values.allergies || ''
+          },
+          notes: values.notes || '',
+          amenities: ['Wifi','Laundry']
+        })
+      });
+      if (!res.ok) throw new Error('Failed to submit application');
+      toast({ title: 'Application submitted', description: 'Your application was submitted successfully.' });
+      await loadApplications();
+    } catch (e: any) {
+      toast({ title: 'Submission failed', description: e.message, variant: 'destructive' as any });
+    }
   };
+
+  const loadApplications = async () => {
+    const baseUrl = (import.meta as any).env?.VITE_API_URL || `${location.protocol}//${location.hostname}:8080`;
+    const token = localStorage.getItem('auth_token') || '';
+    try {
+      const endpoint = statusFilter === 'all' ? '/student/applications' : '/student/applications/active';
+      const res = await fetch(`${baseUrl}${endpoint}`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) throw new Error('Failed to load applications');
+      const data = await res.json();
+      setApps(data.items || []);
+    } catch {}
+  };
+
+  const loadSummary = async () => {
+    const baseUrl = (import.meta as any).env?.VITE_API_URL || `${location.protocol}//${location.hostname}:8080`;
+    const token = localStorage.getItem('auth_token') || '';
+    try {
+      const res = await fetch(`${baseUrl}/student/applications/summary`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) throw new Error('Failed to load summary');
+      const data = await res.json();
+      setSummary(data);
+    } catch {}
+  };
+
+  useEffect(() => { loadApplications(); loadSummary(); }, [statusFilter]);
 
   const handleViewApplication = (application: any) => {
     setSelectedApplication(application);
@@ -327,9 +404,8 @@ const ApplicationsPage = () => {
         </div>
 
         <Tabs defaultValue="applications" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="applications">Active Applications</TabsTrigger>
-            <TabsTrigger value="saved">Saved Listings</TabsTrigger>
             <TabsTrigger value="apply">New Application</TabsTrigger>
             <TabsTrigger value="timeline">Timeline</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
@@ -363,7 +439,7 @@ const ApplicationsPage = () => {
                   </Select>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => { loadApplications(); loadSummary(); }}>
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Refresh
                   </Button>
@@ -382,7 +458,7 @@ const ApplicationsPage = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Total Applications</p>
-                      <p className="text-2xl font-bold text-primary">3</p>
+                      <p className="text-2xl font-bold text-primary">{summary.total}</p>
                     </div>
                     <FileText className="w-8 h-8 text-primary" />
                   </div>
@@ -394,7 +470,7 @@ const ApplicationsPage = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Pending Review</p>
-                      <p className="text-2xl font-bold text-orange-500">1</p>
+                      <p className="text-2xl font-bold text-orange-500">{summary.pending}</p>
                     </div>
                     <Clock className="w-8 h-8 text-orange-500" />
                   </div>
@@ -406,7 +482,7 @@ const ApplicationsPage = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Approved</p>
-                      <p className="text-2xl font-bold text-green-500">1</p>
+                      <p className="text-2xl font-bold text-green-500">{summary.approved}</p>
                     </div>
                     <CheckCircle className="w-8 h-8 text-green-500" />
                   </div>
@@ -418,7 +494,7 @@ const ApplicationsPage = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Success Rate</p>
-                      <p className="text-2xl font-bold text-blue-500">33%</p>
+                      <p className="text-2xl font-bold text-blue-500">{summary.successRate}%</p>
                     </div>
                     <Star className="w-8 h-8 text-blue-500" />
                   </div>
@@ -428,7 +504,7 @@ const ApplicationsPage = () => {
 
             {/* Applications List */}
             <div className="space-y-4">
-              {applications
+              {(apps.length ? apps : applications)
                 .filter(app => 
                   (statusFilter === 'all' || app.status === statusFilter) &&
                   (searchQuery === '' || app.property.toLowerCase().includes(searchQuery.toLowerCase()) || app.location.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -584,148 +660,6 @@ const ApplicationsPage = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="saved" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-semibold">Saved Listings</h2>
-                <p className="text-muted-foreground">Properties you've bookmarked for later consideration</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <Badge variant="secondary" className="text-sm px-3 py-1">
-                  {savedListings.length} saved listings
-                </Badge>
-                <Button variant="outline" size="sm">
-                  <Filter className="w-4 h-4 mr-2" />
-                  Filter
-                </Button>
-              </div>
-            </div>
-
-            {/* Search and Sort Bar */}
-            <Card className="p-4">
-              <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-                <div className="flex flex-1 gap-4 items-center">
-                  <div className="relative flex-1 max-w-sm">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <Input
-                      placeholder="Search saved listings..."
-                      className="pl-10"
-                    />
-                  </div>
-                  <Select defaultValue="newest">
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Sort by" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="newest">Newest First</SelectItem>
-                      <SelectItem value="oldest">Oldest First</SelectItem>
-                      <SelectItem value="price-low">Price: Low to High</SelectItem>
-                      <SelectItem value="price-high">Price: High to Low</SelectItem>
-                      <SelectItem value="location">Location</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    Refresh
-                  </Button>
-                  <Button size="sm">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Browse More
-                  </Button>
-                </div>
-              </div>
-            </Card>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {savedListings.map((listing) => (
-                <Card key={listing.id} className="card-hover group">
-                  <div className="relative">
-                    <div className="aspect-video bg-muted rounded-t-lg overflow-hidden">
-                      <img 
-                        src={listing.image} 
-                        alt={listing.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                      />
-                    </div>
-                    <div className="absolute top-3 right-3 flex gap-2">
-                      <Button size="sm" variant="secondary" className="h-8 w-8 p-0">
-                        <Heart className="w-4 h-4 text-red-500" />
-                      </Button>
-                      <Button size="sm" variant="secondary" className="h-8 w-8 p-0">
-                        <Share2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <div className="absolute top-3 left-3">
-                      <Badge className="bg-primary/90 text-white">Saved</Badge>
-                    </div>
-                  </div>
-                  <CardContent className="p-4">
-                    <div className="space-y-3">
-                      <div>
-                        <h3 className="font-semibold text-lg mb-1">{listing.title}</h3>
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <MapPin className="w-4 h-4" />
-                          {listing.location}
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="w-4 h-4 text-green-600" />
-                          <span className="text-xl font-bold text-green-600">{listing.rent}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 text-yellow-500" />
-                          <span className="text-sm font-medium">4.8</span>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-1">
-                        <Badge variant="secondary" className="text-xs">Wifi</Badge>
-                        <Badge variant="secondary" className="text-xs">Laundry</Badge>
-                        <Badge variant="secondary" className="text-xs">Parking</Badge>
-                      </div>
-
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>Saved {listing.savedDate}</span>
-                        <span>2.1 miles from campus</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-2 mt-4">
-                      <Button variant="outline" className="flex-1">
-                        <Eye className="w-4 h-4 mr-2" />
-                        View Details
-                      </Button>
-                      <Button className="flex-1 btn-hero">
-                        <FileText className="w-4 h-4 mr-2" />
-                        Apply Now
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {/* Empty State */}
-            {savedListings.length === 0 && (
-              <Card className="p-12 text-center">
-                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Bookmark className="w-8 h-8 text-muted-foreground" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2">No Saved Listings</h3>
-                <p className="text-muted-foreground mb-4">
-                  Start browsing properties and save the ones you like for later.
-                </p>
-                <Button>
-                  <Search className="w-4 h-4 mr-2" />
-                  Browse Listings
-                </Button>
-              </Card>
-            )}
-          </TabsContent>
           <TabsContent value="apply" className="space-y-6">
             <div className="flex items-center justify-between">
               <div>

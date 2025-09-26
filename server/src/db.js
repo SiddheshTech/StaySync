@@ -120,4 +120,62 @@ listingSchema.index({ title: 'text', location: 'text' });
 
 export const Listing = mongoose.model('Listing', listingSchema);
 
+// Application schema for student applications
+const applicationSchema = new mongoose.Schema(
+  {
+    studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Student', required: true, index: true },
+    // Applicant information
+    applicant: {
+      firstName: String,
+      lastName: String,
+      email: String,
+      phone: String,
+      university: String,
+      studentId: String
+    },
+    property: { type: String, required: true },
+    location: { type: String, required: true },
+    rent: { type: String, required: true },
+    moveInDate: { type: String, required: true },
+    status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending', index: true },
+    progress: { type: Number, default: 0 },
+    nextStep: { type: String, default: '' },
+    priority: { type: String, enum: ['low', 'medium', 'high'], default: 'low' },
+    compatibility: { type: Number, default: 0 },
+    // References & financial
+    references: {
+      refName: String,
+      refRelationship: String,
+      refPhone: String,
+      refEmail: String
+    },
+    financial: {
+      monthlyBudget: String,
+      incomeSource: String,
+      guarantor: String
+    },
+    history: {
+      prevAddress: String,
+      livingExperience: String,
+      landlordName: String,
+      landlordPhone: String
+    },
+    compatibilityInfo: {
+      cleanliness: String,
+      noiseTolerance: String,
+      sleepSchedule: String,
+      allergies: String
+    },
+    notes: String,
+    amenities: { type: [String], default: [] },
+    images: { type: [String], default: [] },
+    timeline: { type: [{ date: String, event: String, status: String }], default: [] },
+    documents: { type: [{ name: String, status: String, uploaded: String }], default: [] },
+    messages: { type: [{ from: String, message: String, time: String }], default: [] }
+  },
+  { timestamps: true }
+);
+
+export const Application = mongoose.model('Application', applicationSchema);
+
 
