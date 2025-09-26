@@ -100,12 +100,40 @@ const RegisterPage = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Registration Successful!",
-      description: "Please check your email for verification instructions.",
-    });
+    const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+    try {
+      const baseUrl = (import.meta as any).env?.VITE_API_URL || `${location.protocol}//${location.hostname}:8080`;
+      const res = await fetch(`${baseUrl}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: fullName,
+          email: formData.email,
+          password: formData.password
+        })
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Registration failed');
+      }
+      const data = await res.json();
+      localStorage.setItem('auth_token', data.token);
+      toast({ title: 'Registration Successful!', description: 'Welcome to StaySync.' });
+      // Navigate to student dashboard after register
+      // Use router navigation first, then hard-redirect as fallback
+      (window as any).appNavigate
+        ? (window as any).appNavigate('/student/dashboard', { replace: true })
+        : null;
+      setTimeout(() => {
+        if (!location.pathname.startsWith('/student')) {
+          window.location.href = '/student/dashboard';
+        }
+      }, 0);
+    } catch (err: any) {
+      toast({ title: 'Registration failed', description: err.message, variant: 'destructive' as any });
+    }
   };
 
   const renderStepContent = () => {

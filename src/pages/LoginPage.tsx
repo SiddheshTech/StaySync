@@ -57,18 +57,35 @@ const LoginPage = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Login Successful!",
-      description: "Welcome back to CampusConnect!",
-    });
-    
-    // Redirect based on login type
-    if (formData.loginType === 'university') {
-      navigate('/admin');
-    } else {
-      navigate('/dashboard');
+    try {
+      const baseUrl = (import.meta as any).env?.VITE_API_URL || `${location.protocol}//${location.hostname}:8080`;
+      const res = await fetch(`${baseUrl}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, password: formData.password })
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Login failed');
+      }
+      const data = await res.json();
+      localStorage.setItem('auth_token', data.token);
+      toast({ title: 'Login Successful!', description: 'Welcome back to StaySync!' });
+      if (formData.loginType === 'university') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/student/dashboard', { replace: true });
+        // Hard redirect fallback to ensure landing on dashboard in all cases
+        setTimeout(() => {
+          if (!location.pathname.startsWith('/student')) {
+            window.location.href = '/student/dashboard';
+          }
+        }, 0);
+      }
+    } catch (err: any) {
+      toast({ title: 'Login failed', description: err.message, variant: 'destructive' as any });
     }
   };
 

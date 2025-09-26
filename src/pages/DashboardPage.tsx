@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -99,9 +99,25 @@ const applicationSchema = z.object({
 type ApplicationFormValues = z.infer<typeof applicationSchema>;
 
 const DashboardPage = () => {
-  // Local state for embedded Navigation section
+  // Local state and fetched dashboard
   const [navViewMode, setNavViewMode] = useState<'grid' | 'list'>('grid');
   const [navShowFilters, setNavShowFilters] = useState(false);
+  const [db, setDb] = useState<any>(null);
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const baseUrl = (import.meta as any).env?.VITE_API_URL || `${location.protocol}//${location.hostname}:8080`;
+        const token = localStorage.getItem('auth_token');
+        const res = await fetch(`${baseUrl}/student/dashboard`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        if (!res.ok) throw new Error('Failed to load');
+        const data = await res.json();
+        setDb(data);
+      } catch {}
+    };
+    fetchDashboard();
+  }, []);
 
   // Sample data (shared with Navigation section)
   const navProperties = [
@@ -205,8 +221,8 @@ const DashboardPage = () => {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-foreground">Welcome back, Sarah!</h1>
-                <p className="text-muted-foreground">Here's what's happening with your housing search</p>
+                <h1 className="text-3xl font-bold text-foreground">{db?.student?.name ? `Welcome back, ${db.student.name}!` : 'Welcome back!'}</h1>
+                <p className="text-muted-foreground">{db?.student?.university || "Here's what's happening with your housing search"}</p>
               </div>
               <div className="flex gap-3">
                 <Button variant="outline" size="sm">
@@ -244,7 +260,7 @@ const DashboardPage = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">New Matches</p>
-                  <p className="text-2xl font-bold text-primary">12</p>
+                  <p className="text-2xl font-bold text-primary">{db?.stats?.applicationsSubmitted ?? 12}</p>
                 </div>
                 <Users className="w-8 h-8 text-primary" />
               </div>
@@ -256,7 +272,7 @@ const DashboardPage = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Unread Messages</p>
-                  <p className="text-2xl font-bold text-primary">5</p>
+                  <p className="text-2xl font-bold text-primary">{db?.stats?.messagesUnread ?? 5}</p>
                 </div>
                 <MessageSquare className="w-8 h-8 text-primary" />
               </div>
@@ -268,7 +284,7 @@ const DashboardPage = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Saved Listings</p>
-                  <p className="text-2xl font-bold text-primary">8</p>
+                  <p className="text-2xl font-bold text-primary">{db?.stats?.documentsPending ?? 8}</p>
                 </div>
                 <Heart className="w-8 h-8 text-primary" />
               </div>
@@ -280,7 +296,7 @@ const DashboardPage = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Applications</p>
-                  <p className="text-2xl font-bold text-primary">3</p>
+                  <p className="text-2xl font-bold text-primary">{db?.stats?.applicationsApproved ?? 3}</p>
                 </div>
                 <FileText className="w-8 h-8 text-primary" />
               </div>
