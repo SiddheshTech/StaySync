@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
@@ -14,28 +14,35 @@ import {
 } from 'recharts';
 
 const AdminDashboardPage = () => {
-  const stats = [
-    { label: 'Housing Demand Index', value: '78', sub: 'This week', icon: BarChart3 },
-    { label: 'Active Students', value: '4,312', sub: 'Last 30 days', icon: Users },
-    { label: 'Satisfaction Score', value: '4.2/5', sub: 'Quarter to date', icon: TrendingUp },
-    { label: 'Identified Issues', value: '23', sub: 'Open problems', icon: AlertTriangle },
-  ];
+  const [metrics, setMetrics] = useState<{ stats: any; usage: any[] } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [range, setRange] = useState<string>('30d');
   const [campus, setCampus] = useState<string>('all');
 
-  const usageData = useMemo(
-    () => [
-      { name: 'Mon', usage: 120 },
-      { name: 'Tue', usage: 200 },
-      { name: 'Wed', usage: 150 },
-      { name: 'Thu', usage: 220 },
-      { name: 'Fri', usage: 180 },
-      { name: 'Sat', usage: 90 },
-      { name: 'Sun', usage: 70 },
-    ],
-    [range, campus],
-  );
+  useEffect(() => {
+    const controller = new AbortController();
+    async function load() {
+      try {
+        setLoading(true);
+        setError(null);
+        const base = import.meta.env.VITE_API_URL || '';
+        const res = await fetch(`${base}/admin/metrics?range=${range}&campus=${campus}`, { signal: controller.signal });
+        if (!res.ok) throw new Error('Failed');
+        const data = await res.json();
+        setMetrics(data);
+      } catch (e: any) {
+        if (e?.name !== 'AbortError') setError('Failed to load metrics');
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+    return () => controller.abort();
+  }, [range, campus]);
+
+  const usageData = metrics?.usage || [];
 
   return (
     <div className="space-y-6">
@@ -70,7 +77,27 @@ const AdminDashboardPage = () => {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((s) => (
+        {[{
+          label: 'Housing Demand Index',
+          value: metrics ? String(metrics.stats?.demandIndex ?? '-') : '-',
+          sub: 'This week',
+          icon: BarChart3
+        },{
+          label: 'Active Students',
+          value: metrics ? String(metrics.stats?.activeStudents ?? '-') : '-',
+          sub: 'Last 30 days',
+          icon: Users
+        },{
+          label: 'Satisfaction Score',
+          value: metrics ? `${metrics.stats?.satisfaction ?? '-'}/5` : '-',
+          sub: 'Quarter to date',
+          icon: TrendingUp
+        },{
+          label: 'Identified Issues',
+          value: metrics ? String(metrics.stats?.issuesOpen ?? '-') : '-',
+          sub: 'Open problems',
+          icon: AlertTriangle
+        }].map((s) => (
           <Card key={s.label}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{s.label}</CardTitle>

@@ -9,7 +9,7 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   const { pathname } = useLocation();
-  const sidebarRoutes = ['/dashboard', '/profile', '/messages', '/applications', '/billing', '/help', '/student'];
+  const sidebarRoutes = ['/dashboard', '/profile', '/messages', '/applications', '/billing', '/help', '/student', '/admin'];
   const brandBarRoutes = ['/search', '/listing', '/create-listing'];
   const hideChrome = sidebarRoutes.some((prefix) => pathname.startsWith(prefix));
   const hasBrandBar = brandBarRoutes.some((prefix) => pathname.startsWith(prefix));
